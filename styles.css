@@ -1,0 +1,367 @@
+/* General Styles */
+body {
+    font-family: "Black Ops One", system-ui;
+    background-color: #121212;
+    color: #e0e0e0;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+.black-ops-one-regular {
+    font-family: "Black Ops One", system-ui;
+    font-weight: 400;
+    font-style: normal;
+}
+
+
+/* Title */
+#title {
+    text-align: center;
+    font-size: 3em;
+    margin-top: 30px;
+    color: red;
+    text-shadow: 2px 2px 4px #000000;
+}
+
+/* Instrument Selector */
+.instrument-selector {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 20px 0;
+    font-family: "Black Ops One", system-ui;
+}
+
+.instrument-container {
+    display: flex;
+    align-items: center;
+    margin: 5px;
+    font-family: "Black Ops One", system-ui;
+}
+
+.instrument-button {
+    background-color: #1e1e1e;
+    border: 2px solid #424242;
+    color: #e0e0e0;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    margin-right: 5px;
+    font-size: 1em;
+    font-family: "Black Ops One", system-ui;
+}
+
+.instrument-button.active {
+    background-color: #00e676;
+    border-color: #00e676;
+    color: #000;
+    transform: scale(1.05);
+}
+
+.mute-button {
+    background-color: #424242;
+    border: 2px solid #616161;
+    color: #fff;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    margin-right: 5px;
+    font-size: 0.9em;
+}
+
+.mute-button.muted {
+    background-color: #d50000;
+    border-color: #d50000;
+    transform: rotate(180deg);
+}
+
+.mute-button:hover,
+.instrument-button:hover {
+    background-color: #333333;
+}
+
+.volume-slider {
+    width: 100px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+/* Drum Machine Grid */
+#drum-machine {
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    gap: 5px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px 80px; /* Added padding bottom to avoid overlap with footer */
+}
+
+.pad {
+    position: relative;
+    background-color: #1e1e1e;
+    border: 1px solid #424242;
+    border-radius: 5px;
+    cursor: pointer;
+    padding-top: 100%;
+    overflow: hidden;
+    transition: background-color 0.1s, box-shadow 0.3s;
+}
+
+.pad.active {
+    background-color: #00e676;
+    color: #000;
+}
+
+.pad.playing {
+    box-shadow: 0 0 10px red;
+}
+
+.pad:after {
+    content: attr(data-step);
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    font-size: 0.8em;
+    color: #757575;
+}
+
+/* Bass Synth Pitch Knob */
+.pitch-knob {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 40px;
+    height: 40px;
+    background-color: #424242;
+    border-radius: 50%;
+    cursor: pointer;
+    display: none;
+}
+
+.pad.active .pitch-knob {
+    display: block;
+}
+
+/* Controls */
+#controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 30px 0;
+    flex-wrap: wrap;
+    font-family: "Black Ops One", system-ui;
+}
+
+#controls > * {
+    margin: 10px;
+    font-family: "Black Ops One", system-ui;
+}
+
+button.control-button {
+    background-color: #1e1e1e;
+    border: 2px solid #424242;
+    color: #e0e0e0;
+    padding: 15px 25px;
+    font-size: 1em;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+button.control-button:hover {
+    background-color: #333333;
+    transform: scale(1.05);
+}
+
+#tempo-container {
+    display: flex;
+    align-items: center;
+    color: #e0e0e0;
+}
+
+#tempo {
+    margin-left: 10px;
+    width: 150px;
+    cursor: pointer;
+}
+
+#bpm-display {
+    margin-left: 10px;
+    font-size: 1.2em;
+    width: 40px;
+    text-align: center;
+}
+
+/* Master Volume */
+#master-volume-container {
+    display: flex;
+    align-items: center;
+    color: #e0e0e0;
+    margin: 10px 0;
+}
+
+#master-volume-container label {
+    margin-right: 10px;
+}
+
+#master-volume {
+    width: 150px;
+    cursor: pointer;
+}
+
+/* ADSR Controls */
+#adsr-controls {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #000;
+}
+
+#adsr-controls h3 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: red;
+}
+
+.adsr-instrument {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.adsr-instrument h4 {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 10px;
+    color: #ffffff;
+}
+
+.adsr-instrument label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 5px;
+    width: 100px;
+}
+
+.adsr-slider {
+    width: 80px;
+    cursor: pointer;
+}
+
+/* Modal Styles */
+#modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+#modal-content {
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 5px;
+    max-width: 600px;
+    text-align: left;
+    color: #e0e0e0;
+    position: relative;
+}
+
+#modal-content h2 {
+    margin-top: 0;
+    color: red;
+}
+
+#close-modal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    color: #e0e0e0;
+    font-size: 1.5em;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+#close-modal:hover {
+    color: #ff5252;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 2px;
+    background-color: #121212;
+    color: #757575;
+    font-size: 0.9em;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 800px) {
+    #drum-machine {
+        grid-template-columns: repeat(8, 1fr);
+    }
+}
+
+@media (max-width: 500px) {
+    #drum-machine {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .instrument-button {
+        padding: 8px 15px;
+        font-size: 0.9em;
+    }
+
+    .mute-button {
+        padding: 8px;
+        font-size: 0.8em;
+    }
+
+    .volume-slider {
+        width: 80px;
+    }
+
+    button.control-button {
+        padding: 10px 15px;
+        font-size: 0.9em;
+    }
+
+    #tempo-container, #master-volume-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #tempo, #master-volume {
+        margin-left: 0;
+        margin-top: 10px;
+        width: 100px;
+    }
+
+    #adsr-controls {
+        padding: 10px;
+    }
+
+    .adsr-instrument label {
+        width: 80px;
+    }
+
+    .adsr-slider {
+        width: 60px;
+    }
+}
