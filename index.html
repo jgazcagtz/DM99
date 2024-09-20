@@ -1,0 +1,144 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DM99</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap" rel="stylesheet">
+    <!-- Link to External CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="title">DM99</div>
+
+    <!-- Instrument Selector -->
+    <div class="instrument-selector">
+        <!-- Instrument Buttons with Mute and Volume -->
+        <div class="instrument-container">
+            <button class="instrument-button" data-instrument="kick">Kick</button>
+            <input type="range" class="volume-slider" data-instrument="kick" min="0" max="1" step="0.01" value="0.8">
+            <button class="mute-button" data-instrument="kick">M</button>
+        </div>
+        <div class="instrument-container">
+            <button class="instrument-button" data-instrument="snare">Snare</button>
+            <input type="range" class="volume-slider" data-instrument="snare" min="0" max="1" step="0.01" value="0.7">
+            <button class="mute-button" data-instrument="snare">M</button>
+        </div>
+        <div class="instrument-container">
+            <button class="instrument-button" data-instrument="hihatClosed">Hi-Hat Closed</button>
+            <input type="range" class="volume-slider" data-instrument="hihatClosed" min="0" max="1" step="0.01" value="0.6">
+            <button class="mute-button" data-instrument="hihatClosed">M</button>
+        </div>
+        <div class="instrument-container">
+            <button class="instrument-button" data-instrument="hihatOpened">Hi-Hat Opened</button>
+            <input type="range" class="volume-slider" data-instrument="hihatOpened" min="0" max="1" step="0.01" value="0.6">
+            <button class="mute-button" data-instrument="hihatOpened">M</button>
+        </div>
+        <div class="instrument-container">
+            <button class="instrument-button" data-instrument="clap">Clap</button>
+            <input type="range" class="volume-slider" data-instrument="clap" min="0" max="1" step="0.01" value="0.7">
+            <button class="mute-button" data-instrument="clap">M</button>
+        </div>
+        <div class="instrument-container">
+            <button class="instrument-button" data-instrument="bassSynth">Bass Synth</button>
+            <input type="range" class="volume-slider" data-instrument="bassSynth" min="0" max="1" step="0.01" value="0.5">
+            <button class="mute-button" data-instrument="bassSynth">M</button>
+        </div>
+        <div class="instrument-container">
+            <button class="instrument-button" data-instrument="midTom">Mid-Tom</button>
+            <input type="range" class="volume-slider" data-instrument="midTom" min="0" max="1" step="0.01" value="0.7">
+            <button class="mute-button" data-instrument="midTom">M</button>
+        </div>
+    </div>
+
+    <!-- Drum Machine -->
+    <div id="drum-machine">
+        <!-- Pads will be generated dynamically -->
+    </div>
+
+    <!-- Controls -->
+    <div id="controls">
+        <button id="play" class="control-button">Play</button>
+        <button id="stop" class="control-button">Stop</button>
+        <button id="random-bass" class="control-button">Random Bass Line</button>
+        <button id="show-instructions" class="control-button">User Guide</button>
+        <div id="tempo-container">
+            <label for="tempo">Tempo:</label>
+            <input type="range" id="tempo" min="60" max="200" value="120">
+            <div id="bpm-display">120</div>
+        </div>
+        <div id="master-volume-container">
+            <label for="master-volume">Master Volume:</label>
+            <input type="range" id="master-volume" min="0" max="1" step="0.01" value="1">
+        </div>
+    </div>
+
+    <!-- ADSR Controls -->
+    <div id="adsr-controls">
+        <h3>ADSR Controls</h3>
+        <div class="adsr-instrument">
+            <h4>Kick Drum</h4>
+            <label>Attack:
+                <input type="range" class="adsr-slider" data-instrument="kick" data-param="attack" min="0" max="1" step="0.01" value="0.1">
+            </label>
+            <label>Decay:
+                <input type="range" class="adsr-slider" data-instrument="kick" data-param="decay" min="0" max="2" step="0.01" value="0.3">
+            </label>
+            <label>Sustain:
+                <input type="range" class="adsr-slider" data-instrument="kick" data-param="sustain" min="0" max="1" step="0.01" value="0.7">
+            </label>
+            <label>Release:
+                <input type="range" class="adsr-slider" data-instrument="kick" data-param="release" min="0" max="2" step="0.01" value="0.5">
+            </label>
+        </div>
+        <div class="adsr-instrument">
+            <h4>Hi-Hat</h4>
+            <label>Attack:
+                <input type="range" class="adsr-slider" data-instrument="hihatClosed" data-param="attack" min="0" max="1" step="0.01" value="0.05">
+            </label>
+            <label>Decay:
+                <input type="range" class="adsr-slider" data-instrument="hihatClosed" data-param="decay" min="0" max="2" step="0.01" value="0.2">
+            </label>
+            <label>Sustain:
+                <input type="range" class="adsr-slider" data-instrument="hihatClosed" data-param="sustain" min="0" max="1" step="0.01" value="0.5">
+            </label>
+            <label>Release:
+                <input type="range" class="adsr-slider" data-instrument="hihatClosed" data-param="release" min="0" max="2" step="0.01" value="0.3">
+            </label>
+        </div>
+        <!-- Removed ADSR Controls for Bass Synth -->
+    </div>
+
+    <!-- Instructions Modal -->
+    <div id="modal">
+        <div id="modal-content">
+            <button id="close-modal">&times;</button>
+            <h2>User Guide</h2>
+            
+            <ul>
+                <li>Select an instrument by clicking on its name.</li>
+                <li>Click on the pads to activate or deactivate steps for that instrument.</li>
+                <li>For the Bass Synth, adjust the pitch of each step using the knob that appears on active pads.</li>
+                <li>Use the mute button (M) and volume sliders next to each instrument to control sound levels.</li>
+                <li>Adjust the tempo using the slider under 'Tempo'.</li>
+                <li>Adjust the master volume using the 'Master Volume' slider.</li>
+                <li>Use the ADSR controls to shape the sound of the Kick Drum and Hi-Hat.</li>
+                <li>Click 'Play' to start the sequence and 'Stop' to halt it.</li>
+                <li>You can use 'Random Bass Line' to generate a random 16-step bass sequence.</li>
+                
+            </ul>
+            
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        J.Gazca &copy; <span id="current-year"></span>
+    </footer>
+
+    <!-- Include NexusUI Library for Knob Control -->
+    <script src="https://cdn.jsdelivr.net/npm/nexusui@2.0.1/dist/NexusUI.min.js"></script>
+    <!-- Link to External JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
