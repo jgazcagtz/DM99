@@ -1,19 +1,19 @@
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>DM99</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap" rel="stylesheet">
-    <!-- Link to External CSS -->
+    <!-- Enlace a CSS Externo -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="title">DM99</div>
 
-    <!-- Instrument Selector -->
+    <!-- Selector de Instrumentos -->
     <div class="instrument-selector">
-        <!-- Instrument Buttons with Mute and Volume -->
+        <!-- Botones de Instrumentos con Silencio y Volumen -->
         <div class="instrument-container">
             <button class="instrument-button" data-instrument="kick">Kick</button>
             <input type="range" class="volume-slider" data-instrument="kick" min="0" max="1" step="0.01" value="0.8">
@@ -25,12 +25,12 @@
             <button class="mute-button" data-instrument="snare">M</button>
         </div>
         <div class="instrument-container">
-            <button class="instrument-button" data-instrument="hihatClosed">Hi-Hat Closed</button>
+            <button class="instrument-button" data-instrument="hihatClosed">Hi-Hat C</button>
             <input type="range" class="volume-slider" data-instrument="hihatClosed" min="0" max="1" step="0.01" value="0.6">
             <button class="mute-button" data-instrument="hihatClosed">M</button>
         </div>
         <div class="instrument-container">
-            <button class="instrument-button" data-instrument="hihatOpened">Hi-Hat Opened</button>
+            <button class="instrument-button" data-instrument="hihatOpened">Hi-Hat O</button>
             <input type="range" class="volume-slider" data-instrument="hihatOpened" min="0" max="1" step="0.01" value="0.6">
             <button class="mute-button" data-instrument="hihatOpened">M</button>
         </div>
@@ -40,45 +40,45 @@
             <button class="mute-button" data-instrument="clap">M</button>
         </div>
         <div class="instrument-container">
-            <button class="instrument-button" data-instrument="bassSynth">Bass</button>
+            <button class="instrument-button" data-instrument="bassSynth">Bajo</button>
             <input type="range" class="volume-slider" data-instrument="bassSynth" min="0" max="1" step="0.01" value="0.5">
             <button class="mute-button" data-instrument="bassSynth">M</button>
         </div>
         <div class="instrument-container">
-            <button class="instrument-button" data-instrument="midTom">Mid-Tom</button>
+            <button class="instrument-button" data-instrument="midTom">Tom</button>
             <input type="range" class="volume-slider" data-instrument="midTom" min="0" max="1" step="0.01" value="0.7">
             <button class="mute-button" data-instrument="midTom">M</button>
         </div>
     </div>
 
-    <!-- Drum Machine -->
+    <!-- Máquina de Ritmos -->
     <div id="drum-machine">
-        <!-- Pads will be generated dynamically -->
+        <!-- Los pads serán generados dinámicamente -->
     </div>
 
-    <!-- Controls -->
+    <!-- Controles -->
     <div id="controls">
-        <button id="play" class="control-button">Play</button>
-        <button id="stop" class="control-button">Stop</button>
-        <button id="random-bass" class="control-button">Random Bass Line</button>
-        <button id="show-instructions" class="control-button">User Guide</button>
+        <button id="play" class="control-button">Reproducir</button>
+        <button id="stop" class="control-button">Detener</button>
+        <button id="random-bass" class="control-button">Línea de Bajo Aleatoria</button>
+        <button id="show-instructions" class="control-button">Guía del Usuario</button>
         <div id="tempo-container">
             <label for="tempo">Tempo:</label>
             <input type="range" id="tempo" min="60" max="200" value="120">
             <div id="bpm-display">120</div>
         </div>
         <div id="master-volume-container">
-            <label for="master-volume">Master Volume:</label>
+            <label for="master-volume">Master Vol:</label>
             <input type="range" id="master-volume" min="0" max="1" step="0.01" value="1">
         </div>
     </div>
 
-    <!-- ADSR Controls -->
+    <!-- Controles ADSR -->
     <div id="adsr-controls">
         <h3>ADSR</h3>
         <div class="adsr-instrument">
-            <h4>Kick Drum</h4>
-            <label>Attack:
+            <h4>Kick</h4>
+            <label>Ataque:
                 <input type="range" class="adsr-slider" data-instrument="kick" data-param="attack" min="0" max="1" step="0.01" value="0.1">
             </label>
             <label>Decay:
@@ -93,53 +93,51 @@
         </div>
         <div class="adsr-instrument">
             <h4>Hi-Hat</h4>
-            <label>Attack:
+            <label>Ataque:
                 <input type="range" class="adsr-slider" data-instrument="hihatClosed" data-param="attack" min="0" max="1" step="0.01" value="0.05">
             </label>
             <label>Decay:
                 <input type="range" class="adsr-slider" data-instrument="hihatClosed" data-param="decay" min="0" max="2" step="0.01" value="0.2">
             </label>
-            <label>Sustain:
+            <label>Sostenimiento:
                 <input type="range" class="adsr-slider" data-instrument="hihatClosed" data-param="sustain" min="0" max="1" step="0.01" value="0.5">
             </label>
             <label>Release:
                 <input type="range" class="adsr-slider" data-instrument="hihatClosed" data-param="release" min="0" max="2" step="0.01" value="0.3">
             </label>
         </div>
-        <!-- Removed ADSR Controls for Bass Synth -->
+        <!-- Se han eliminado los Controles ADSR para el Sintetizador de Bajo -->
     </div>
 
-    <!-- Instructions Modal -->
+    <!-- Modal de Instrucciones -->
     <div id="modal">
         <div id="modal-content">
             <button id="close-modal">&times;</button>
-            <h2>User Guide</h2>
+            <h2>Guía del Usuario</h2>
             
             <ul>
-                <li>Select an instrument by clicking on its name.</li>
-                <li>Click on the pads to activate or deactivate steps for that instrument.</li>
-                <li>For the Bass Synth, adjust the pitch of each step using the knob that appears on active pads.</li>
-                <li>Use the mute button (M) and volume sliders next to each instrument to control sound levels.</li>
-                <li>Adjust the tempo using the slider under 'Tempo'.</li>
-                <li>Adjust the master volume using the 'Master Volume' slider.</li>
-                <li>Use the ADSR controls to shape the sound of the Kick Drum and Hi-Hat.</li>
-                <li>Click 'Play' to start the sequence and 'Stop' to halt it.</li>
-                <li>You can use 'Random Bass Line' to generate a random 16-step bass sequence.</li>
-                
+                <li>Selecciona un instrumento.</li>
+                <li>Selecciona los pads para activar o desactivar pasos para ese instrumento.</li>
+                <li>Para el Bajo, ajusta el tono de cada paso usando el botón que aparece en los pads activos.</li>
+                <li>Usa el botón de silencio (M) y los deslizadores de volumen junto a cada instrumento para controlar los niveles de sonido.</li>
+                <li>Ajusta el tempo usando el control deslizante debajo de 'Tempo'.</li>
+                <li>Ajusta el volumen maestro usando el control deslizante de 'Master Vol'.</li>
+                <li>Usa los controles ADSR para moldear el sonido del Kick y el Hi-Hat.</li>
+                <li>Haz clic en 'Reproducir' para iniciar la secuencia y en 'Detener' para detenerla.</li>
+                <li>Puedes usar 'Línea de Bajo Aleatoria' para generar una secuencia de bajo aleatoria de 16 pasos.</li>
             </ul>
             
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer>
-    DM99 v1.0 | J.Gazca &copy; <span id="current-year"></span>
+    <!-- Pie de Página -->
+        <footer>
+    DM99 Beta v1.0 | J.Gazca &copy; <span id="current-year"></span>
 </footer>
 
-
-    <!-- Include NexusUI Library for Knob Control -->
+    <!-- Incluir la Biblioteca NexusUI para el Control de Knob -->
     <script src="https://cdn.jsdelivr.net/npm/nexusui@2.0.1/dist/NexusUI.min.js"></script>
-    <!-- Link to External JavaScript -->
+    <!-- Enlace a JavaScript Externo -->
     <script src="script.js"></script>
 </body>
 </html>
