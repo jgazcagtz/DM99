@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -20,37 +21,37 @@
     <div class="instrument-selector">
         <!-- Botones de Instrumentos con Silencio y Volumen -->
         <div class="instrument-container">
-            <button class="instrument-button" data-instrument="kick">Kick </button>
+            <button class="instrument-button" data-instrument="kick">Kick</button>
             <input type="range" class="volume-slider" data-instrument="kick" min="0" max="1" step="0.01" value="0.8">
             <button class="mute-button" data-instrument="kick">🔇</button>
         </div>
         <div class="instrument-container">
-            <button class="instrument-button" data-instrument="snare">Snare </button>
+            <button class="instrument-button" data-instrument="snare">Snare</button>
             <input type="range" class="volume-slider" data-instrument="snare" min="0" max="1" step="0.01" value="0.7">
             <button class="mute-button" data-instrument="snare">🔇</button>
         </div>
         <div class="instrument-container">
-            <button class="instrument-button" data-instrument="hihatClosed">Hi-Hat C </button>
+            <button class="instrument-button" data-instrument="hihatClosed">Hi-Hat C</button>
             <input type="range" class="volume-slider" data-instrument="hihatClosed" min="0" max="1" step="0.01" value="0.6">
             <button class="mute-button" data-instrument="hihatClosed">🔇</button>
         </div>
         <div class="instrument-container">
-            <button class="instrument-button" data-instrument="hihatOpened">Hi-Hat O </button>
+            <button class="instrument-button" data-instrument="hihatOpened">Hi-Hat O</button>
             <input type="range" class="volume-slider" data-instrument="hihatOpened" min="0" max="1" step="0.01" value="0.6">
             <button class="mute-button" data-instrument="hihatOpened">🔇</button>
         </div>
         <div class="instrument-container">
-            <button class="instrument-button" data-instrument="clap">Clap </button>
+            <button class="instrument-button" data-instrument="clap">Clap</button>
             <input type="range" class="volume-slider" data-instrument="clap" min="0" max="1" step="0.01" value="0.7">
             <button class="mute-button" data-instrument="clap">🔇</button>
         </div>
         <div class="instrument-container">
-            <button class="instrument-button" data-instrument="bassSynth">Bajo </button>
+            <button class="instrument-button" data-instrument="bassSynth">Bajo</button>
             <input type="range" class="volume-slider" data-instrument="bassSynth" min="0" max="1" step="0.01" value="0.5">
             <button class="mute-button" data-instrument="bassSynth">🔇</button>
         </div>
         <div class="instrument-container">
-            <button class="instrument-button" data-instrument="midTom">Tom </button>
+            <button class="instrument-button" data-instrument="midTom">Tom</button>
             <input type="range" class="volume-slider" data-instrument="midTom" min="0" max="1" step="0.01" value="0.7">
             <button class="mute-button" data-instrument="midTom">🔇</button>
         </div>
@@ -67,11 +68,19 @@
         <button id="stop" class="control-button">⏹️ Detener</button>
         <button id="random-bass" class="control-button">🎲 Línea de Bajo Aleatoria</button>
         <button id="show-instructions" class="control-button">📖 Guía del Usuario</button>
+        
         <div id="tempo-container">
             <label for="tempo">Tempo:</label>
             <input type="range" id="tempo" min="60" max="200" value="120">
             <div id="bpm-display">120</div>
         </div>
+        
+        <div id="swing-container">
+            <label for="swing">Swing:</label>
+            <input type="range" id="swing" min="0" max="100" value="0">
+            <div id="swing-display">0%</div>
+        </div>
+        
         <div id="master-volume-container">
             <label for="master-volume">Volumen Maestro:</label>
             <input type="range" id="master-volume" min="0" max="1" step="0.01" value="1">
@@ -82,7 +91,7 @@
     <div id="adsr-controls">
         <h3>ADSR</h3>
         <div class="adsr-instrument">
-            <h4>Kick </h4>
+            <h4>Kick</h4>
             <label>Ataque:
                 <input type="range" class="adsr-slider" data-instrument="kick" data-param="attack" min="0" max="1" step="0.01" value="0.1">
             </label>
@@ -97,7 +106,7 @@
             </label>
         </div>
         <div class="adsr-instrument">
-            <h4>Hi-Hat </h4>
+            <h4>Hi-Hat</h4>
             <label>Ataque:
                 <input type="range" class="adsr-slider" data-instrument="hihatClosed" data-param="attack" min="0" max="1" step="0.01" value="0.05">
             </label>
@@ -126,6 +135,7 @@
                 <li>Para el Bajo, ajusta el tono de cada paso usando el botón que aparece en los pads activos.</li>
                 <li>Usa el botón de silencio (🔇) y los deslizadores de volumen junto a cada instrumento para controlar los niveles de sonido.</li>
                 <li>Ajusta el tempo usando el control deslizante debajo de 'Tempo'.</li>
+                <li>Ajusta el swing usando el control deslizante debajo de 'Swing'.</li>
                 <li>Ajusta el volumen maestro usando el control deslizante de 'Volumen Maestro'.</li>
                 <li>Usa los controles ADSR para moldear el sonido del Bombo y el Hi-Hat.</li>
                 <li>Haz clic en 'Reproducir' ▶️ para iniciar la secuencia y en 'Detener' ⏹️ para detenerla.</li>
