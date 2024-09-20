@@ -64,13 +64,20 @@ const randomBassButton = document.getElementById('random-bass');
 // const exportMidiButton = document.getElementById('export-midi');
 const tempoSlider = document.getElementById('tempo');
 const bpmDisplay = document.getElementById('bpm-display');
+const swingSlider = document.getElementById('swing');
+const swingDisplay = document.getElementById('swing-display');
 const showInstructionsButton = document.getElementById('show-instructions');
 const modal = document.getElementById('modal');
 const closeModalButton = document.getElementById('close-modal');
 let isPlaying = false;
 let currentNote = 0;
 let tempo = 120;
+let swing = 0; // Swing percentage (0-100)
 let timerID;
+let swingOffset = 0;
+
+// Initialize swing display
+swingDisplay.textContent = `${swing}%`;
 
 const sequences = {
     kick: new Array(16).fill(false),
@@ -243,6 +250,13 @@ adsrSliders.forEach(slider => {
     });
 });
 
+// Swing Slider Event
+swingSlider.addEventListener('input', () => {
+    swing = parseInt(swingSlider.value);
+    swingDisplay.textContent = `${swing}%`;
+    swingOffset = swing / 100 * (60 / tempo) / 2; // Calculate swing offset based on tempo
+});
+
 // Play Sound with ADSR Envelope
 function playSound(buffer, time, playbackRate = 1, duration = null, instrument = null, adsr = null) {
     const source = audioCtx.createBufferSource();
@@ -291,7 +305,7 @@ function nextNote() {
     currentNote = (currentNote + 1) % 16;
 }
 
-// Schedule Note
+// Schedule Note with Swing
 function scheduleNote(beatNumber, time) {
     // Highlight the pads
     const pads = document.querySelectorAll('.pad');
@@ -304,6 +318,12 @@ function scheduleNote(beatNumber, time) {
         sequences.hihatOpened[beatNumber] = false;
     }
 
+    // Calculate swing offset for even beats
+    let adjustedTime = time;
+    if ((beatNumber % 2) === 1) { // Even step in 0-based index
+        adjustedTime += swingOffset;
+    }
+
     // Play sounds
     Object.keys(sequences).forEach(instrument => {
         if (mutedInstruments[instrument]) return;
@@ -313,14 +333,14 @@ function scheduleNote(beatNumber, time) {
             if (step.active) {
                 const pitch = Math.pow(2, step.pitch / 12);
                 // No ADSR for Bass Synth
-                playSound(buffers[instrument], time, pitch, null, instrument, null);
+                playSound(buffers[instrument], adjustedTime, pitch, null, instrument, null);
             }
         } else if (sequences[instrument][beatNumber]) {
             let adsr = null;
             if (adsrParameters[instrument]) {
                 adsr = adsrParameters[instrument];
             }
-            playSound(buffers[instrument], time, 1, null, instrument, adsr);
+            playSound(buffers[instrument], adjustedTime, 1, null, instrument, adsr);
         }
     });
 }
@@ -349,6 +369,8 @@ function stopPlaying() {
 tempoSlider.addEventListener('input', () => {
     tempo = parseInt(tempoSlider.value);
     bpmDisplay.textContent = tempo;
+    // Recalculate swing offset based on new tempo
+    swingOffset = swing / 100 * (60 / tempo) / 2;
 });
 
 // Play/Stop Button Events
@@ -401,6 +423,8 @@ async function init() {
     instrumentButtons[0].classList.add('active');
     updatePads();
     bpmDisplay.textContent = tempo;
+    swingDisplay.textContent = `${swing}%`;
+    swingOffset = swing / 100 * (60 / tempo) / 2;
     document.getElementById('current-year').textContent = new Date().getFullYear();
 }
 
