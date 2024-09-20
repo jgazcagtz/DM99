@@ -13,7 +13,6 @@ body {
     font-style: normal;
 }
 
-
 /* Title */
 #title {
     text-align: center;
@@ -175,19 +174,30 @@ button.control-button:hover {
     transform: scale(1.05);
 }
 
-#tempo-container {
+#tempo-container,
+#swing-container,
+#master-volume-container {
     display: flex;
     align-items: center;
     color: #e0e0e0;
 }
 
-#tempo {
+#tempo-container label,
+#swing-container label,
+#master-volume-container label {
+    margin-right: 10px;
+}
+
+#tempo,
+#swing,
+#master-volume {
     margin-left: 10px;
     width: 150px;
     cursor: pointer;
 }
 
-#bpm-display {
+#bpm-display,
+#swing-display {
     margin-left: 10px;
     font-size: 1.2em;
     width: 40px;
@@ -196,19 +206,7 @@ button.control-button:hover {
 
 /* Master Volume */
 #master-volume-container {
-    display: flex;
-    align-items: center;
-    color: #e0e0e0;
     margin: 10px 0;
-}
-
-#master-volume-container label {
-    margin-right: 10px;
-}
-
-#master-volume {
-    width: 150px;
-    cursor: pointer;
 }
 
 /* ADSR Controls */
@@ -342,12 +340,16 @@ footer {
         font-size: 0.9em;
     }
 
-    #tempo-container, #master-volume-container {
+    #tempo-container,
+    #swing-container,
+    #master-volume-container {
         flex-direction: column;
         align-items: center;
     }
 
-    #tempo, #master-volume {
+    #tempo,
+    #swing,
+    #master-volume {
         margin-left: 0;
         margin-top: 10px;
         width: 100px;
@@ -389,4 +391,3 @@ footer {
     background-color: #FFC700;
     transform: scale(1.05);
 }
-
