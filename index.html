@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -19,7 +18,7 @@
 
     <!-- Instrument Selector -->
     <div class="instrument-selector">
-        <!-- Instrument Buttons with Mute, Solo, and Volume Controls -->
+        <!-- Instrument Containers with Mute, Solo, and Volume Controls -->
         <div class="instrument-container">
             <button class="instrument-button" data-instrument="kick">Kick</button>
             <button class="solo-button" data-instrument="kick">🔊</button>
@@ -99,6 +98,12 @@
             <input type="range" id="lowpass-filter" min="200" max="20000" step="100" value="20000">
             <div id="lowpass-display">20000 Hz</div>
         </div>
+        
+        <div id="highpass-filter-container">
+            <label for="highpass-filter">High-Pass Filter:</label>
+            <input type="range" id="highpass-filter" min="20" max="2000" step="100" value="20">
+            <div id="highpass-display">20 Hz</div>
+        </div>
     </div>
 
     <!-- ADSR Controls -->
@@ -151,6 +156,7 @@
                 <li>Adjust the swing using the slider under 'Swing'.</li>
                 <li>Adjust the master volume using the 'Master Volume' slider.</li>
                 <li>Adjust the Low-Pass Filter cutoff frequency using the 'Low-Pass Filter' slider.</li>
+                <li>Adjust the High-Pass Filter cutoff frequency using the 'High-Pass Filter' slider.</li>
                 <li>Use the ADSR controls to shape the sound of the Kick and Hi-Hat.</li>
                 <li>Click 'Play' ▶️ to start the sequence and 'Stop' ⏹️ to stop it.</li>
                 <li>You can use 'Random Bass Line' 🎲 to generate a 16-step random bass sequence duplicated to fill 32 steps.</li>
