@@ -7,11 +7,6 @@ body {
     padding: 0;
     overflow-x: hidden;
 }
-.black-ops-one-regular {
-    font-family: "Black Ops One", system-ui;
-    font-weight: 400;
-    font-style: normal;
-}
 
 /* Title */
 #title {
@@ -22,25 +17,46 @@ body {
     text-shadow: 2px 2px 4px #000000;
 }
 
+/* Master Volume at Top Right */
+#master-volume-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    color: #e0e0e0;
+}
+
+#master-volume-container label {
+    margin-right: 10px;
+}
+
+#master-volume-container input[type="range"] {
+    width: 150px;
+    cursor: pointer;
+}
+
 /* Instrument Selector */
 .instrument-selector {
+  font-family: "Black Ops One", system-ui;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     margin: 20px 0;
-    font-family: "Black Ops One", system-ui;
 }
 
 .instrument-container {
+  font-family: "Black Ops One", system-ui;
     display: flex;
     align-items: center;
     margin: 5px 10px;
-    font-family: "Black Ops One", system-ui;
+    width: 300px; /* Ensures alignment */
 }
 
 .instrument-button,
 .solo-button,
 .mute-button {
+  font-family: "Black Ops One", system-ui;
     background-color: #1e1e1e;
     border: 2px solid #424242;
     color: #e0e0e0;
@@ -50,7 +66,6 @@ body {
     transition: background-color 0.3s, transform 0.2s, color 0.3s;
     margin-right: 5px;
     font-size: 1em;
-    font-family: "Black Ops One", system-ui;
 }
 
 .instrument-button.active {
@@ -98,12 +113,11 @@ body {
 /* Drum Machine Grid */
 #drum-machine {
     display: grid;
-    grid-template-columns: repeat(16, 1fr); /* 16 columns */
-    grid-template-rows: repeat(2, auto);    /* 2 rows */
+    grid-template-columns: repeat(16, 1fr);
     gap: 5px;
-    max-width: 1600px; /* Adjusted for more steps */
+    max-width: 1600px;
     margin: 0 auto;
-    padding: 0 20px 80px; /* Added padding bottom to avoid overlap with footer */
+    padding: 0 20px 80px;
 }
 
 .pad {
@@ -154,20 +168,20 @@ body {
 
 /* Controls */
 #controls {
+  font-family: "Black Ops One", system-ui;
     display: flex;
     justify-content: center;
     align-items: center;
     margin: 30px 0;
     flex-wrap: wrap;
-    font-family: "Black Ops One", system-ui;
 }
 
 #controls > * {
     margin: 10px;
-    font-family: "Black Ops One", system-ui;
 }
 
 button.control-button {
+  font-family: "Black Ops One", system-ui;
     background-color: #1e1e1e;
     border: 2px solid #424242;
     color: #e0e0e0;
@@ -183,30 +197,27 @@ button.control-button:hover {
     transform: scale(1.05);
 }
 
-#tempo-container,
-#swing-container,
-#master-volume-container,
-#lowpass-filter-container,
-#highpass-filter-container {
+/* Slider Controls */
+#slider-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 20px 0;
+}
+
+#slider-controls > div {
+    margin: 10px;
     display: flex;
     align-items: center;
     color: #e0e0e0;
 }
 
-#tempo-container label,
-#swing-container label,
-#master-volume-container label,
-#lowpass-filter-container label,
-#highpass-filter-container label {
+#slider-controls label {
     margin-right: 10px;
 }
 
-#tempo,
-#swing,
-#master-volume,
-#lowpass-filter,
-#highpass-filter {
-    margin-left: 10px;
+#slider-controls input[type="range"] {
     width: 150px;
     cursor: pointer;
 }
@@ -214,53 +225,53 @@ button.control-button:hover {
 #bpm-display,
 #swing-display,
 #lowpass-display,
-#highpass-display {
+#highpass-display,
+#eq-low-display,
+#eq-mid-display,
+#eq-high-display,
+#bass-eq-low-display,
+#bass-eq-mid-display,
+#bass-eq-high-display {
     margin-left: 10px;
     font-size: 1.2em;
     width: 80px;
     text-align: center;
 }
 
-/* Master Volume */
-#master-volume-container {
-    margin: 10px 0;
-}
-
-/* Low-Pass Filter */
-#lowpass-filter-container {
+/* Equalizer Controls */
+#equalizer-controls,
+#bass-eq-controls {
+    margin-top: 10px;
     display: flex;
     align-items: center;
-    margin-top: 10px;
+    flex-wrap: wrap;
 }
 
-/* High-Pass Filter */
-#highpass-filter-container {
-    display: flex;
-    align-items: center;
-    margin-top: 10px;
+#equalizer-controls label,
+#bass-eq-controls label {
+    margin-right: 5px;
 }
 
-#lowpass-filter-container label,
-#highpass-filter-container label {
-    margin-right: 10px;
+#equalizer-controls input[type="range"],
+#bass-eq-controls input[type="range"] {
+    width: 150px;
 }
 
-#lowpass-filter,
-#highpass-filter {
-    width: 200px;
+#equalizer-controls span,
+#bass-eq-controls span {
+    width: 60px;
 }
 
-#lowpass-display,
-#highpass-display {
-    margin-left: 10px;
-    font-size: 1.2em;
-    width: 80px;
+#bass-eq-controls h3 {
+    width: 100%;
     text-align: center;
+    color: red;
+    margin-bottom: 10px;
 }
 
 /* ADSR Controls */
 #adsr-controls {
-    max-width: 1600px; /* Adjusted for more steps */
+    max-width: 1600px;
     margin: 20px auto;
     padding: 20px;
     background-color: #1e1e1e;
@@ -268,10 +279,16 @@ button.control-button:hover {
     box-shadow: 0 0 10px #000;
 }
 
-#adsr-controls h3 {
+#adsr-toggle {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 0;
     color: red;
+    cursor: pointer;
+}
+
+#adsr-content {
+    display: none;
+    margin-top: 20px;
 }
 
 .adsr-instrument {
@@ -361,8 +378,8 @@ footer {
 /* Responsive Design */
 @media (max-width: 1200px) {
     #drum-machine {
-        grid-template-columns: repeat(16, 1fr); /* Maintain 16 columns */
-        grid-template-rows: repeat(2, auto);
+        grid-template-columns: repeat(16, 1fr);
+        grid-template-rows: repeat(auto-fill, 1fr);
     }
     #adsr-controls {
         max-width: 1000px;
@@ -371,15 +388,15 @@ footer {
 
 @media (max-width: 800px) {
     #drum-machine {
-        grid-template-columns: repeat(8, 1fr); /* 8 columns */
-        grid-template-rows: repeat(4, auto);    /* 4 rows */
+        grid-template-columns: repeat(8, 1fr);
+        grid-template-rows: repeat(auto-fill, 1fr);
     }
 }
 
 @media (max-width: 500px) {
     #drum-machine {
-        grid-template-columns: repeat(4, 1fr); /* 4 columns */
-        grid-template-rows: repeat(8, auto);    /* 8 rows */
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(auto-fill, 1fr);
     }
 
     .instrument-button,
@@ -404,20 +421,12 @@ footer {
         font-size: 0.9em;
     }
 
-    #tempo-container,
-    #swing-container,
-    #master-volume-container,
-    #lowpass-filter-container,
-    #highpass-filter-container {
+    #slider-controls {
         flex-direction: column;
         align-items: center;
     }
 
-    #tempo,
-    #swing,
-    #master-volume,
-    #lowpass-filter,
-    #highpass-filter {
+    #slider-controls input[type="range"] {
         margin-left: 0;
         margin-top: 10px;
         width: 100px;
