@@ -34,19 +34,20 @@ body {
 .instrument-container {
     display: flex;
     align-items: center;
-    margin: 5px;
+    margin: 5px 10px;
     font-family: "Black Ops One", system-ui;
 }
 
 .instrument-button,
-.solo-button {
+.solo-button,
+.mute-button {
     background-color: #1e1e1e;
     border: 2px solid #424242;
     color: #e0e0e0;
     padding: 10px 15px;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
+    transition: background-color 0.3s, transform 0.2s, color 0.3s;
     margin-right: 5px;
     font-size: 1em;
     font-family: "Black Ops One", system-ui;
@@ -73,7 +74,8 @@ body {
 }
 
 .solo-button:hover,
-.instrument-button:hover {
+.instrument-button:hover,
+.mute-button:hover {
     background-color: #333333;
 }
 
@@ -81,6 +83,16 @@ body {
     width: 100px;
     margin-right: 10px;
     cursor: pointer;
+}
+
+.mute-button {
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.mute-button.muted {
+    background-color: red;
+    color: #fff;
 }
 
 /* Drum Machine Grid */
@@ -93,7 +105,6 @@ body {
     margin: 0 auto;
     padding: 0 20px 80px; /* Added padding bottom to avoid overlap with footer */
 }
-
 
 .pad {
     position: relative;
@@ -175,7 +186,8 @@ button.control-button:hover {
 #tempo-container,
 #swing-container,
 #master-volume-container,
-#lowpass-filter-container {
+#lowpass-filter-container,
+#highpass-filter-container {
     display: flex;
     align-items: center;
     color: #e0e0e0;
@@ -184,14 +196,16 @@ button.control-button:hover {
 #tempo-container label,
 #swing-container label,
 #master-volume-container label,
-#lowpass-filter-container label {
+#lowpass-filter-container label,
+#highpass-filter-container label {
     margin-right: 10px;
 }
 
 #tempo,
 #swing,
 #master-volume,
-#lowpass-filter {
+#lowpass-filter,
+#highpass-filter {
     margin-left: 10px;
     width: 150px;
     cursor: pointer;
@@ -199,7 +213,8 @@ button.control-button:hover {
 
 #bpm-display,
 #swing-display,
-#lowpass-display {
+#lowpass-display,
+#highpass-display {
     margin-left: 10px;
     font-size: 1.2em;
     width: 80px;
@@ -218,15 +233,25 @@ button.control-button:hover {
     margin-top: 10px;
 }
 
-#lowpass-filter-container label {
+/* High-Pass Filter */
+#highpass-filter-container {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+#lowpass-filter-container label,
+#highpass-filter-container label {
     margin-right: 10px;
 }
 
-#lowpass-filter {
+#lowpass-filter,
+#highpass-filter {
     width: 200px;
 }
 
-#lowpass-display {
+#lowpass-display,
+#highpass-display {
     margin-left: 10px;
     font-size: 1.2em;
     width: 80px;
@@ -336,7 +361,8 @@ footer {
 /* Responsive Design */
 @media (max-width: 1200px) {
     #drum-machine {
-        grid-template-columns: repeat(16, 1fr); /* Adjusted for smaller screens */
+        grid-template-columns: repeat(16, 1fr); /* Maintain 16 columns */
+        grid-template-rows: repeat(2, auto);
     }
     #adsr-controls {
         max-width: 1000px;
@@ -345,17 +371,20 @@ footer {
 
 @media (max-width: 800px) {
     #drum-machine {
-        grid-template-columns: repeat(8, 1fr);
+        grid-template-columns: repeat(8, 1fr); /* 8 columns */
+        grid-template-rows: repeat(4, auto);    /* 4 rows */
     }
 }
 
 @media (max-width: 500px) {
     #drum-machine {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(4, 1fr); /* 4 columns */
+        grid-template-rows: repeat(8, auto);    /* 8 rows */
     }
 
     .instrument-button,
-    .solo-button {
+    .solo-button,
+    .mute-button {
         padding: 8px 12px;
         font-size: 0.9em;
     }
@@ -378,7 +407,8 @@ footer {
     #tempo-container,
     #swing-container,
     #master-volume-container,
-    #lowpass-filter-container {
+    #lowpass-filter-container,
+    #highpass-filter-container {
         flex-direction: column;
         align-items: center;
     }
@@ -386,7 +416,8 @@ footer {
     #tempo,
     #swing,
     #master-volume,
-    #lowpass-filter {
+    #lowpass-filter,
+    #highpass-filter {
         margin-left: 0;
         margin-top: 10px;
         width: 100px;
