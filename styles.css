@@ -38,12 +38,13 @@ body {
     font-family: "Black Ops One", system-ui;
 }
 
-.instrument-button {
+.instrument-button,
+.solo-button {
     background-color: #1e1e1e;
     border: 2px solid #424242;
     color: #e0e0e0;
-    padding: 10px 20px;
-    border-radius: 25px;
+    padding: 10px 15px;
+    border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.2s;
     margin-right: 5px;
@@ -58,25 +59,20 @@ body {
     transform: scale(1.05);
 }
 
-.mute-button {
+.solo-button {
     background-color: #424242;
-    border: 2px solid #616161;
-    color: #fff;
+    border-color: #424242;
     padding: 10px;
     border-radius: 50%;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
-    margin-right: 5px;
-    font-size: 0.9em;
+    font-size: 1em;
 }
 
-.mute-button.muted {
-    background-color: #d50000;
-    border-color: #d50000;
-    transform: rotate(180deg);
+.solo-button.active {
+    background-color: #ffeb3b;
+    border-color: #ffeb3b;
 }
 
-.mute-button:hover,
+.solo-button:hover,
 .instrument-button:hover {
     background-color: #333333;
 }
@@ -90,12 +86,14 @@ body {
 /* Drum Machine Grid */
 #drum-machine {
     display: grid;
-    grid-template-columns: repeat(16, 1fr);
+    grid-template-columns: repeat(16, 1fr); /* 16 columns */
+    grid-template-rows: repeat(2, auto);    /* 2 rows */
     gap: 5px;
-    max-width: 1200px;
+    max-width: 1600px; /* Adjusted for more steps */
     margin: 0 auto;
     padding: 0 20px 80px; /* Added padding bottom to avoid overlap with footer */
 }
+
 
 .pad {
     position: relative;
@@ -176,7 +174,8 @@ button.control-button:hover {
 
 #tempo-container,
 #swing-container,
-#master-volume-container {
+#master-volume-container,
+#lowpass-filter-container {
     display: flex;
     align-items: center;
     color: #e0e0e0;
@@ -184,23 +183,26 @@ button.control-button:hover {
 
 #tempo-container label,
 #swing-container label,
-#master-volume-container label {
+#master-volume-container label,
+#lowpass-filter-container label {
     margin-right: 10px;
 }
 
 #tempo,
 #swing,
-#master-volume {
+#master-volume,
+#lowpass-filter {
     margin-left: 10px;
     width: 150px;
     cursor: pointer;
 }
 
 #bpm-display,
-#swing-display {
+#swing-display,
+#lowpass-display {
     margin-left: 10px;
     font-size: 1.2em;
-    width: 40px;
+    width: 80px;
     text-align: center;
 }
 
@@ -209,9 +211,31 @@ button.control-button:hover {
     margin: 10px 0;
 }
 
+/* Low-Pass Filter */
+#lowpass-filter-container {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+#lowpass-filter-container label {
+    margin-right: 10px;
+}
+
+#lowpass-filter {
+    width: 200px;
+}
+
+#lowpass-display {
+    margin-left: 10px;
+    font-size: 1.2em;
+    width: 80px;
+    text-align: center;
+}
+
 /* ADSR Controls */
 #adsr-controls {
-    max-width: 1200px;
+    max-width: 1600px; /* Adjusted for more steps */
     margin: 20px auto;
     padding: 20px;
     background-color: #1e1e1e;
@@ -310,6 +334,15 @@ footer {
 }
 
 /* Responsive Design */
+@media (max-width: 1200px) {
+    #drum-machine {
+        grid-template-columns: repeat(16, 1fr); /* Adjusted for smaller screens */
+    }
+    #adsr-controls {
+        max-width: 1000px;
+    }
+}
+
 @media (max-width: 800px) {
     #drum-machine {
         grid-template-columns: repeat(8, 1fr);
@@ -321,12 +354,14 @@ footer {
         grid-template-columns: repeat(4, 1fr);
     }
 
-    .instrument-button {
-        padding: 8px 15px;
+    .instrument-button,
+    .solo-button {
+        padding: 8px 12px;
         font-size: 0.9em;
     }
 
-    .mute-button {
+    .mute-button,
+    .solo-button {
         padding: 8px;
         font-size: 0.8em;
     }
@@ -342,14 +377,16 @@ footer {
 
     #tempo-container,
     #swing-container,
-    #master-volume-container {
+    #master-volume-container,
+    #lowpass-filter-container {
         flex-direction: column;
         align-items: center;
     }
 
     #tempo,
     #swing,
-    #master-volume {
+    #master-volume,
+    #lowpass-filter {
         margin-left: 0;
         margin-top: 10px;
         width: 100px;
@@ -357,6 +394,7 @@ footer {
 
     #adsr-controls {
         padding: 10px;
+        max-width: 1000px;
     }
 
     .adsr-instrument label {
@@ -368,7 +406,7 @@ footer {
     }
 }
 
-/* Botón de Buy Me a Coffee */
+/* Buy Me a Coffee Button */
 .buy-me-coffee {
     position: fixed;
     bottom: 10px;
