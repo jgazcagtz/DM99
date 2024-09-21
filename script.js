@@ -70,6 +70,8 @@ const swingSlider = document.getElementById('swing');
 const swingDisplay = document.getElementById('swing-display');
 const lowpassSlider = document.getElementById('lowpass-filter');
 const lowpassDisplay = document.getElementById('lowpass-display');
+const highpassSlider = document.getElementById('highpass-filter');
+const highpassDisplay = document.getElementById('highpass-display');
 const showInstructionsButton = document.getElementById('show-instructions');
 const modal = document.getElementById('modal');
 const closeModalButton = document.getElementById('close-modal');
@@ -80,9 +82,10 @@ let swing = 0; // Swing percentage (0-100)
 let timerID;
 let swingOffset = 0;
 
-// Initialize swing display
+// Initialize swing and filter displays
 swingDisplay.textContent = `${swing}%`;
 lowpassDisplay.textContent = `${lowpassSlider.value} Hz`;
+highpassDisplay.textContent = `${highpassSlider.value} Hz`;
 
 // Sequences
 const sequences = {
@@ -151,7 +154,13 @@ const masterLowpass = audioCtx.createBiquadFilter();
 masterLowpass.type = 'lowpass';
 masterLowpass.frequency.value = lowpassSlider.value; // Initial value from slider
 
-masterGain.connect(masterLowpass).connect(masterCompressor).connect(audioCtx.destination);
+// Master High-Pass Filter
+const masterHighpass = audioCtx.createBiquadFilter();
+masterHighpass.type = 'highpass';
+masterHighpass.frequency.value = highpassSlider.value; // Initial value from slider
+
+// Connect the audio nodes: Master Gain -> High-Pass Filter -> Low-Pass Filter -> Compressor -> Destination
+masterGain.connect(masterHighpass).connect(masterLowpass).connect(masterCompressor).connect(audioCtx.destination);
 
 // Create per-instrument gain nodes
 const instrumentGainNodes = {};
@@ -168,7 +177,7 @@ loadSounds();
 // Generate Pads
 function generatePads() {
     drumMachine.innerHTML = '';
-    for (let i = 0; i < 32; i++) { // Changed from 16 to 32
+    for (let i = 0; i < 32; i++) { // 32 pads
         const pad = document.createElement('div');
         pad.classList.add('pad');
         pad.dataset.step = i + 1;
@@ -262,6 +271,7 @@ volumeSliders.forEach(slider => {
         const instrument = slider.dataset.instrument;
         instrumentVolumes[instrument] = parseFloat(slider.value);
         instrumentGainNodes[instrument].gain.value = instrumentVolumes[instrument];
+        updateGainNodes();
     });
 });
 
@@ -290,6 +300,13 @@ lowpassSlider.addEventListener('input', () => {
     lowpassDisplay.textContent = `${freq} Hz`;
 });
 
+// High-Pass Filter Slider Event
+highpassSlider.addEventListener('input', () => {
+    const freq = parseInt(highpassSlider.value);
+    masterHighpass.frequency.value = freq;
+    highpassDisplay.textContent = `${freq} Hz`;
+});
+
 // Swing Slider Event
 swingSlider.addEventListener('input', () => {
     swing = parseInt(swingSlider.value);
@@ -299,7 +316,7 @@ swingSlider.addEventListener('input', () => {
 
 // Update Gain Nodes based on Mute and Solo States
 function updateGainNodes() {
-    const isAnySoloed = Object.values(soloedInstruments).some(val => val);
+    const isAnySoloed = isAnySoloedFunction();
     Object.keys(instrumentGainNodes).forEach(instrument => {
         if (isAnySoloed) {
             // If the instrument is soloed, set volume to its slider value
@@ -365,7 +382,7 @@ let nextNoteTime = 0.0;
 function nextNote() {
     const secondsPerBeat = 60.0 / tempo;
     nextNoteTime += 0.25 * secondsPerBeat;
-    currentNote = (currentNote + 1) % 32; // Changed from 16 to 32
+    currentNote = (currentNote + 1) % 32; // 32 steps
 }
 
 // Schedule Note with Swing
@@ -389,7 +406,7 @@ function scheduleNote(beatNumber, time) {
 
     // Play sounds
     Object.keys(sequences).forEach(instrument => {
-        if (mutedInstruments[instrument] || (isAnySoloed() && !soloedInstruments[instrument])) return;
+        if (mutedInstruments[instrument] || (isAnySoloedFunction() && !soloedInstruments[instrument])) return;
 
         if (instrument === 'bassSynth') {
             const step = sequences.bassSynth[beatNumber];
@@ -411,7 +428,7 @@ function scheduleNote(beatNumber, time) {
 }
 
 // Check if any instrument is soloed
-function isAnySoloed() {
+function isAnySoloedFunction() {
     return Object.values(soloedInstruments).some(val => val);
 }
 
@@ -494,7 +511,13 @@ downloadAudioButton.addEventListener('click', async () => {
     offlineLowpass.type = 'lowpass';
     offlineLowpass.frequency.value = lowpassSlider.value;
 
-    master.connect(offlineLowpass).connect(compressor).connect(offlineCtx.destination);
+    // Create master high-pass filter
+    const offlineHighpass = offlineCtx.createBiquadFilter();
+    offlineHighpass.type = 'highpass';
+    offlineHighpass.frequency.value = highpassSlider.value;
+
+    // Connect the audio nodes: Master Gain -> High-Pass Filter -> Low-Pass Filter -> Compressor -> Destination
+    master.connect(offlineHighpass).connect(offlineLowpass).connect(compressor).connect(offlineCtx.destination);
 
     // Create per-instrument gain nodes
     const offlineGainNodes = {};
@@ -536,7 +559,7 @@ downloadAudioButton.addEventListener('click', async () => {
     }
 
     // Schedule all notes
-    for (let i = 0; i < 32; i++) { // Changed from 16 to 32
+    for (let i = 0; i < 32; i++) { // 32 steps
         const beatTime = (i * (60 / tempo)) / 4; // 32 steps per measure
 
         // Apply swing
@@ -546,7 +569,7 @@ downloadAudioButton.addEventListener('click', async () => {
         }
 
         Object.keys(sequences).forEach(instrument => {
-            if (mutedInstruments[instrument] || (isAnySoloed() && !soloedInstruments[instrument])) return;
+            if (mutedInstruments[instrument] || (isAnySoloedFunction() && !soloedInstruments[instrument])) return;
 
             if (instrument === 'bassSynth') {
                 const step = sequences.bassSynth[i];
@@ -663,7 +686,7 @@ function updateBassKnob(pad, index) {
 }
 
 // Check if any instrument is soloed
-function isAnySoloed() {
+function isAnySoloedFunction() {
     return Object.values(soloedInstruments).some(val => val);
 }
 
@@ -677,6 +700,7 @@ async function init() {
     swingDisplay.textContent = `${swing}%`;
     swingOffset = swing / 100 * (60 / tempo) / 2;
     lowpassDisplay.textContent = `${lowpassSlider.value} Hz`;
+    highpassDisplay.textContent = `${highpassSlider.value} Hz`;
     document.getElementById('current-year').textContent = new Date().getFullYear();
 }
 
