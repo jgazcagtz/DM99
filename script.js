@@ -3,7 +3,10 @@ const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
 
 // Define which instruments should be mono
-const monoInstruments = ['kick', 'snare', 'hihatClosed', 'hihatOpened', 'clap', 'midTom'];
+const monoInstruments = [
+    'kick', 'snare', 'hihatClosed', 'hihatOpened', 'clap', 'tom',
+    'perc1', 'perc2', 'perc3', 'perc4', 'perc5', 'perc6','acid'
+];
 
 // Sound URLs
 const sounds = {
@@ -12,8 +15,15 @@ const sounds = {
     hihatClosed: 'https://cdn.freesound.org/previews/638/638654_433684-lq.mp3',
     hihatOpened: 'https://cdn.freesound.org/previews/627/627344_13191763-lq.mp3',
     clap: 'https://cdn.freesound.org/previews/244/244568_165785-lq.mp3',
-    bassSynth: 'https://cdn.freesound.org/previews/711/711461_15225418-lq.mp3',
-    midTom: 'https://cdn.freesound.org/previews/443/443181_6979693-lq.mp3'
+    bass1: 'https://cdn.freesound.org/previews/711/711461_15225418-lq.mp3',  
+    tom: 'https://cdn.freesound.org/previews/443/443181_6979693-lq.mp3',
+    perc1: 'https://cdn.freesound.org/previews/724/724509_11990934-lq.mp3',
+    perc2: 'https://cdn.freesound.org/previews/503/503788_9637845-lq.mp3',
+    perc3: 'https://cdn.freesound.org/previews/503/503779_9637845-lq.mp3',
+    perc4: 'https://cdn.freesound.org/previews/352/352280_1866366-lq.mp3',
+    perc5: 'https://cdn.freesound.org/previews/638/638557_12672694-lq.mp3',
+    perc6: 'https://cdn.freesound.org/previews/707/707194_6295857-lq.mp3',
+  acid: 'https://cdn.freesound.org/previews/21/21998_45941-lq.mp3'
 };
 const buffers = {};
 
@@ -63,7 +73,7 @@ const drumMachine = document.getElementById('drum-machine');
 const playButton = document.getElementById('play');
 const stopButton = document.getElementById('stop');
 const randomBassButton = document.getElementById('random-bass');
-const downloadAudioButton = document.getElementById('download-audio'); // New button
+const downloadAudioButton = document.getElementById('download-audio');
 const tempoSlider = document.getElementById('tempo');
 const bpmDisplay = document.getElementById('bpm-display');
 const swingSlider = document.getElementById('swing');
@@ -72,9 +82,24 @@ const lowpassSlider = document.getElementById('lowpass-filter');
 const lowpassDisplay = document.getElementById('lowpass-display');
 const highpassSlider = document.getElementById('highpass-filter');
 const highpassDisplay = document.getElementById('highpass-display');
+const eqLowSlider = document.getElementById('eq-low');
+const eqMidSlider = document.getElementById('eq-mid');
+const eqHighSlider = document.getElementById('eq-high');
+const eqLowDisplay = document.getElementById('eq-low-display');
+const eqMidDisplay = document.getElementById('eq-mid-display');
+const eqHighDisplay = document.getElementById('eq-high-display');
+const bassEqLowSlider = document.getElementById('bass-eq-low');
+const bassEqMidSlider = document.getElementById('bass-eq-mid');
+const bassEqHighSlider = document.getElementById('bass-eq-high');
+const bassEqLowDisplay = document.getElementById('bass-eq-low-display');
+const bassEqMidDisplay = document.getElementById('bass-eq-mid-display');
+const bassEqHighDisplay = document.getElementById('bass-eq-high-display');
 const showInstructionsButton = document.getElementById('show-instructions');
 const modal = document.getElementById('modal');
 const closeModalButton = document.getElementById('close-modal');
+const adsrToggle = document.getElementById('adsr-toggle');
+const adsrContent = document.getElementById('adsr-content');
+
 let isPlaying = false;
 let currentNote = 0;
 let tempo = 120;
@@ -86,6 +111,12 @@ let swingOffset = 0;
 swingDisplay.textContent = `${swing}%`;
 lowpassDisplay.textContent = `${lowpassSlider.value} Hz`;
 highpassDisplay.textContent = `${highpassSlider.value} Hz`;
+eqLowDisplay.textContent = `${eqLowSlider.value} dB`;
+eqMidDisplay.textContent = `${eqMidSlider.value} dB`;
+eqHighDisplay.textContent = `${eqHighSlider.value} dB`;
+bassEqLowDisplay.textContent = `${bassEqLowSlider.value} dB`;
+bassEqMidDisplay.textContent = `${bassEqMidSlider.value} dB`;
+bassEqHighDisplay.textContent = `${bassEqHighSlider.value} dB`;
 
 // Sequences
 const sequences = {
@@ -94,8 +125,15 @@ const sequences = {
     hihatClosed: new Array(32).fill(false),
     hihatOpened: new Array(32).fill(false),
     clap: new Array(32).fill(false),
-    bassSynth: new Array(32).fill(false).map(() => ({ active: false, pitch: 0 })),
-    midTom: new Array(32).fill(false)
+    bass1: new Array(32).fill(false).map(() => ({ active: false, pitch: 0 })),
+    tom: new Array(32).fill(false),
+    perc1: new Array(32).fill(false),
+    perc2: new Array(32).fill(false),
+    perc3: new Array(32).fill(false),
+    perc4: new Array(32).fill(false),
+    perc5: new Array(32).fill(false),
+    perc6: new Array(32).fill(false),
+  acid: new Array(32).fill(false)
 };
 
 // Mute and Solo States
@@ -105,8 +143,15 @@ const mutedInstruments = {
     hihatClosed: false,
     hihatOpened: false,
     clap: false,
-    bassSynth: false,
-    midTom: false
+    bass1: false,
+    tom: false,
+    perc1: false,
+    perc2: false,
+    perc3: false,
+    perc4: false,
+    perc5: false,
+    perc6: false,
+  acid: false
 };
 
 const soloedInstruments = {
@@ -115,8 +160,15 @@ const soloedInstruments = {
     hihatClosed: false,
     hihatOpened: false,
     clap: false,
-    bassSynth: false,
-    midTom: false
+    bass1: false,
+    tom: false,
+    perc1: false,
+    perc2: false,
+    perc3: false,
+    perc4: false,
+    perc5: false,
+    perc6: false,
+  acid: false
 };
 
 // Instrument Volumes
@@ -126,8 +178,15 @@ const instrumentVolumes = {
     hihatClosed: 0.6,
     hihatOpened: 0.6,
     clap: 0.7,
-    bassSynth: 0.5,
-    midTom: 0.7
+    bass1: 0.5,
+    tom: 0.7,
+    perc1: 0.6,
+    perc2: 0.6,
+    perc3: 0.6,
+    perc4: 0.6,
+    perc5: 0.6,
+    perc6: 0.6,
+  acid: 0.6
 };
 
 // ADSR Parameters (only for Kick Drum and Hi-Hat)
@@ -159,15 +218,65 @@ const masterHighpass = audioCtx.createBiquadFilter();
 masterHighpass.type = 'highpass';
 masterHighpass.frequency.value = highpassSlider.value; // Initial value from slider
 
-// Connect the audio nodes: Master Gain -> High-Pass Filter -> Low-Pass Filter -> Compressor -> Destination
-masterGain.connect(masterHighpass).connect(masterLowpass).connect(masterCompressor).connect(audioCtx.destination);
+// Equalizer Filters
+const eqFilters = {
+    low: audioCtx.createBiquadFilter(),
+    mid: audioCtx.createBiquadFilter(),
+    high: audioCtx.createBiquadFilter()
+};
+
+// Configure EQ Filters
+eqFilters.low.type = 'lowshelf';
+eqFilters.low.frequency.value = 320;
+
+eqFilters.mid.type = 'peaking';
+eqFilters.mid.frequency.value = 1000;
+eqFilters.mid.Q.value = 1;
+
+eqFilters.high.type = 'highshelf';
+eqFilters.high.frequency.value = 3200;
+
+// Bass EQ Filters
+const bassEqFilters = {
+    low: audioCtx.createBiquadFilter(),
+    mid: audioCtx.createBiquadFilter(),
+    high: audioCtx.createBiquadFilter()
+};
+
+// Configure Bass EQ Filters
+bassEqFilters.low.type = 'lowshelf';
+bassEqFilters.low.frequency.value = 80;
+
+bassEqFilters.mid.type = 'peaking';
+bassEqFilters.mid.frequency.value = 500;
+bassEqFilters.mid.Q.value = 1;
+
+bassEqFilters.high.type = 'highshelf';
+bassEqFilters.high.frequency.value = 2000;
+
+// Connect the audio nodes: Master Gain -> EQ Filters -> High-Pass Filter -> Low-Pass Filter -> Compressor -> Destination
+masterGain.connect(eqFilters.low);
+eqFilters.low.connect(eqFilters.mid);
+eqFilters.mid.connect(eqFilters.high);
+eqFilters.high.connect(masterHighpass);
+masterHighpass.connect(masterLowpass);
+masterLowpass.connect(masterCompressor);
+masterCompressor.connect(audioCtx.destination);
 
 // Create per-instrument gain nodes
 const instrumentGainNodes = {};
 Object.keys(instrumentVolumes).forEach(instrument => {
     const gainNode = audioCtx.createGain();
     gainNode.gain.value = instrumentVolumes[instrument];
-    gainNode.connect(masterGain);
+    if (instrument === 'bass1') {
+        // Connect Bass EQ Filters
+        gainNode.connect(bassEqFilters.low);
+        bassEqFilters.low.connect(bassEqFilters.mid);
+        bassEqFilters.mid.connect(bassEqFilters.high);
+        bassEqFilters.high.connect(masterGain);
+    } else {
+        gainNode.connect(masterGain);
+    }
     instrumentGainNodes[instrument] = gainNode;
 });
 
@@ -183,9 +292,9 @@ function generatePads() {
         pad.dataset.step = i + 1;
         pad.dataset.index = i;
 
-        if (currentInstrument === 'bassSynth') {
+        if (currentInstrument === 'bass1') {
             pad.addEventListener('click', () => {
-                const step = sequences.bassSynth[i];
+                const step = sequences[currentInstrument][i];
                 step.active = !step.active;
                 pad.classList.toggle('active', step.active);
                 updateBassKnob(pad, i);
@@ -199,21 +308,22 @@ function generatePads() {
 
         drumMachine.appendChild(pad);
 
-        if (currentInstrument === 'bassSynth') {
+        if (currentInstrument === 'bass1') {
+            // Create pitch knob for bass
             const knobContainer = document.createElement('div');
             knobContainer.classList.add('pitch-knob');
             pad.appendChild(knobContainer);
 
             const knob = new Nexus.Dial(knobContainer, {
                 size: [40, 40],
-                min: -12,
-                max: 12,
+                min: -24,
+                max: 24,
                 step: 1,
-                value: sequences.bassSynth[i].pitch
+                value: sequences[currentInstrument][i].pitch
             });
 
             knob.on('change', (v) => {
-                sequences.bassSynth[i].pitch = v;
+                sequences[currentInstrument][i].pitch = v;
             });
 
             knob.colorize("fill", "#00e676");
@@ -227,8 +337,8 @@ function generatePads() {
 function updatePads() {
     const pads = document.querySelectorAll('.pad');
     pads.forEach((pad, index) => {
-        if (currentInstrument === 'bassSynth') {
-            pad.classList.toggle('active', sequences.bassSynth[index].active);
+        if (currentInstrument === 'bass1') {
+            pad.classList.toggle('active', sequences[currentInstrument][index].active);
         } else {
             pad.classList.toggle('active', sequences[currentInstrument][index]);
         }
@@ -305,6 +415,44 @@ highpassSlider.addEventListener('input', () => {
     const freq = parseInt(highpassSlider.value);
     masterHighpass.frequency.value = freq;
     highpassDisplay.textContent = `${freq} Hz`;
+});
+
+// Equalizer Slider Events
+eqLowSlider.addEventListener('input', () => {
+    const gain = parseInt(eqLowSlider.value);
+    eqFilters.low.gain.value = gain;
+    eqLowDisplay.textContent = `${gain} dB`;
+});
+
+eqMidSlider.addEventListener('input', () => {
+    const gain = parseInt(eqMidSlider.value);
+    eqFilters.mid.gain.value = gain;
+    eqMidDisplay.textContent = `${gain} dB`;
+});
+
+eqHighSlider.addEventListener('input', () => {
+    const gain = parseInt(eqHighSlider.value);
+    eqFilters.high.gain.value = gain;
+    eqHighDisplay.textContent = `${gain} dB`;
+});
+
+// Bass EQ Slider Events
+bassEqLowSlider.addEventListener('input', () => {
+    const gain = parseInt(bassEqLowSlider.value);
+    bassEqFilters.low.gain.value = gain;
+    bassEqLowDisplay.textContent = `${gain} dB`;
+});
+
+bassEqMidSlider.addEventListener('input', () => {
+    const gain = parseInt(bassEqMidSlider.value);
+    bassEqFilters.mid.gain.value = gain;
+    bassEqMidDisplay.textContent = `${gain} dB`;
+});
+
+bassEqHighSlider.addEventListener('input', () => {
+    const gain = parseInt(bassEqHighSlider.value);
+    bassEqFilters.high.gain.value = gain;
+    bassEqHighDisplay.textContent = `${gain} dB`;
 });
 
 // Swing Slider Event
@@ -393,11 +541,6 @@ function scheduleNote(beatNumber, time) {
         pad.classList.toggle('playing', index === beatNumber);
     });
 
-    // Make sure only one hi-hat plays at a time
-    if (sequences.hihatClosed[beatNumber] && sequences.hihatOpened[beatNumber]) {
-        sequences.hihatOpened[beatNumber] = false;
-    }
-
     // Calculate swing offset for even beats
     let adjustedTime = time;
     if ((beatNumber % 2) === 1) { // Even step in 0-based index
@@ -408,11 +551,10 @@ function scheduleNote(beatNumber, time) {
     Object.keys(sequences).forEach(instrument => {
         if (mutedInstruments[instrument] || (isAnySoloedFunction() && !soloedInstruments[instrument])) return;
 
-        if (instrument === 'bassSynth') {
-            const step = sequences.bassSynth[beatNumber];
+        if (instrument === 'bass1') {
+            const step = sequences[instrument][beatNumber];
             if (step.active) {
                 const pitch = Math.pow(2, step.pitch / 12);
-                // No ADSR for Bass Synth
                 playSound(buffers[instrument], adjustedTime, pitch, null, instrument, null);
             }
         } else {
@@ -478,192 +620,36 @@ randomBassButton.addEventListener('click', () => {
     for (let i = 0; i < 16; i++) { // Generate 16 random steps
         firstHalf.push({
             active: Math.random() < 0.5,
-            pitch: Math.floor(Math.random() * 25) - 12 // Random pitch between -12 and +12
+            pitch: Math.floor(Math.random() * 49) - 24 // Random pitch between -24 and +24
         });
     }
     // Duplicate the 16 steps to make 32 steps
-    sequences.bassSynth = [...firstHalf, ...firstHalf];
-    if (currentInstrument === 'bassSynth') {
+    sequences.bass1 = [...firstHalf, ...firstHalf];
+    if (currentInstrument === 'bass1') {
+        generatePads();
+    }
+});
+// Random Bass Line Generator
+randomBassButton.addEventListener('click', () => {
+    const firstHalf = [];
+    for (let i = 0; i < 16; i++) { // Generate 16 random steps
+        firstHalf.push({
+            active: Math.random() < 0.5,
+            pitch: Math.floor(Math.random() * 49) - 24 // Random pitch between -24 and +24
+        });
+    }
+    // Duplicate the 16 steps to make 32 steps
+    sequences.bass1 = [...firstHalf, ...firstHalf];
+    if (currentInstrument === 'acid') {
         generatePads();
     }
 });
 
-// Download Audio Functionality
-downloadAudioButton.addEventListener('click', async () => {
-    // Calculate total duration: 32 steps * 0.25 beats per step * seconds per beat = 8 * (60 / tempo)
-    const totalDuration = 8 * (60 / tempo); // 8 beats
-    const offlineCtx = new OfflineAudioContext(2, audioCtx.sampleRate * totalDuration, audioCtx.sampleRate);
-
-    // Create master gain
-    const master = offlineCtx.createGain();
-    master.gain.value = 0.8;
-
-    // Create compressor
-    const compressor = offlineCtx.createDynamicsCompressor();
-    compressor.threshold.setValueAtTime(-24, offlineCtx.currentTime);
-    compressor.knee.setValueAtTime(30, offlineCtx.currentTime);
-    compressor.ratio.setValueAtTime(12, offlineCtx.currentTime);
-    compressor.attack.setValueAtTime(0, offlineCtx.currentTime);
-    compressor.release.setValueAtTime(0.25, offlineCtx.currentTime);
-
-    // Create master low-pass filter
-    const offlineLowpass = offlineCtx.createBiquadFilter();
-    offlineLowpass.type = 'lowpass';
-    offlineLowpass.frequency.value = lowpassSlider.value;
-
-    // Create master high-pass filter
-    const offlineHighpass = offlineCtx.createBiquadFilter();
-    offlineHighpass.type = 'highpass';
-    offlineHighpass.frequency.value = highpassSlider.value;
-
-    // Connect the audio nodes: Master Gain -> High-Pass Filter -> Low-Pass Filter -> Compressor -> Destination
-    master.connect(offlineHighpass).connect(offlineLowpass).connect(compressor).connect(offlineCtx.destination);
-
-    // Create per-instrument gain nodes
-    const offlineGainNodes = {};
-    Object.keys(instrumentVolumes).forEach(instrument => {
-        const gainNode = offlineCtx.createGain();
-        gainNode.gain.value = instrumentVolumes[instrument];
-        gainNode.connect(master);
-        offlineGainNodes[instrument] = gainNode;
-    });
-
-    // Function to play sound in offline context
-    function playOfflineSound(buffer, time, playbackRate = 1, duration = null, instrument = null, adsr = null) {
-        const source = offlineCtx.createBufferSource();
-        source.buffer = buffer;
-        source.playbackRate.value = playbackRate;
-
-        const gainNode = offlineCtx.createGain();
-
-        if (adsr) {
-            const now = time;
-            gainNode.gain.setValueAtTime(0, now);
-            gainNode.gain.linearRampToValueAtTime(1, now + adsr.attack);
-            gainNode.gain.linearRampToValueAtTime(adsr.sustain, now + adsr.attack + adsr.decay);
-            gainNode.gain.setValueAtTime(adsr.sustain, now + adsr.attack + adsr.decay);
-            if (duration) {
-                gainNode.gain.setValueAtTime(adsr.sustain, now + duration);
-                gainNode.gain.linearRampToValueAtTime(0, now + duration + adsr.release);
-            } else {
-                gainNode.gain.linearRampToValueAtTime(0, now + adsr.release);
-            }
-        }
-
-        source.connect(gainNode);
-        gainNode.connect(offlineGainNodes[instrument]);
-        source.start(time);
-        if (duration) {
-            source.stop(time + duration + (adsr ? adsr.release : 0));
-        }
-    }
-
-    // Schedule all notes
-    for (let i = 0; i < 32; i++) { // 32 steps
-        const beatTime = (i * (60 / tempo)) / 4; // 32 steps per measure
-
-        // Apply swing
-        let adjustedTime = beatTime;
-        if ((i % 2) === 1) { // Even step in 0-based index
-            adjustedTime += swing / 100 * (60 / tempo) / 2;
-        }
-
-        Object.keys(sequences).forEach(instrument => {
-            if (mutedInstruments[instrument] || (isAnySoloedFunction() && !soloedInstruments[instrument])) return;
-
-            if (instrument === 'bassSynth') {
-                const step = sequences.bassSynth[i];
-                if (step.active) {
-                    const pitch = Math.pow(2, step.pitch / 12);
-                    // No ADSR for Bass Synth
-                    playOfflineSound(buffers[instrument], adjustedTime, pitch, null, instrument, null);
-                }
-            } else {
-                if (sequences[instrument][i]) {
-                    let adsr = null;
-                    if (adsrParameters[instrument]) {
-                        adsr = adsrParameters[instrument];
-                    }
-                    playOfflineSound(buffers[instrument], adjustedTime, 1, null, instrument, adsr);
-                }
-            }
-        });
-    }
-
-    // Render the audio
-    const renderedBuffer = await offlineCtx.startRendering();
-
-    // Convert to WAV and download
-    const wavBlob = bufferToWave(renderedBuffer, renderedBuffer.length);
-    const url = URL.createObjectURL(wavBlob);
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = url;
-    a.download = 'drum-machine-sequence.wav';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }, 100);
+// ADSR Controls Toggle
+adsrToggle.addEventListener('click', () => {
+    adsrContent.style.display = adsrContent.style.display === 'block' ? 'none' : 'block';
+    adsrToggle.textContent = adsrContent.style.display === 'block' ? 'ADSR Controls ▲' : 'ADSR Controls ▼';
 });
-
-// Function to convert buffer to WAV
-function bufferToWave(abuffer, len) {
-    const numOfChan = abuffer.numberOfChannels;
-    const length = len * numOfChan * 2 + 44;
-    const buffer = new ArrayBuffer(length);
-    const view = new DataView(buffer);
-    const channels = [];
-    let i;        // Changed from const to let
-    let sample;   // Changed from const to let
-    let offset = 0;
-    let pos = 0;
-
-    // write WAVE header
-    setUint32(0x46464952); // "RIFF"
-    setUint32(length - 8); // file length - 8
-    setUint32(0x45564157); // "WAVE"
-
-    setUint32(0x20746d66); // "fmt " chunk
-    setUint32(16);         // length = 16
-    setUint16(1);          // PCM (uncompressed)
-    setUint16(numOfChan);
-    setUint32(abuffer.sampleRate);
-    setUint32(abuffer.sampleRate * 2 * numOfChan); // avg. bytes/sec
-    setUint16(numOfChan * 2);                     // block-align
-    setUint16(16);                                // 16-bit (hardcoded in this demo)
-
-    setUint32(0x61746164); // "data" - chunk
-    setUint32(len * numOfChan * 2); // chunk length
-
-    // write interleaved data
-    for (i = 0; i < abuffer.numberOfChannels; i++) {
-        channels.push(abuffer.getChannelData(i));
-    }
-
-    while (pos < len) {
-        for (i = 0; i < numOfChan; i++) { // interleave channels
-            sample = Math.max(-1, Math.min(1, channels[i][pos])); // clamp
-            sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF; // scale to 16-bit signed int
-            view.setInt16(offset, sample, true); // write 16-bit sample
-            offset += 2;
-        }
-        pos++;
-    }
-
-    return new Blob([buffer], { type: "audio/wav" });
-
-    function setUint16(data) {
-        view.setUint16(offset, data, true);
-        offset += 2;
-    }
-
-    function setUint32(data) {
-        view.setUint32(offset, data, true);
-        offset += 4;
-    }
-}
 
 // Instructions Modal Events
 showInstructionsButton.addEventListener('click', () => {
@@ -685,11 +671,6 @@ function updateBassKnob(pad, index) {
     // No action needed as the knob is already handled by NexusUI
 }
 
-// Check if any instrument is soloed
-function isAnySoloedFunction() {
-    return Object.values(soloedInstruments).some(val => val);
-}
-
 // Initialize
 async function init() {
     await loadSounds();
@@ -701,6 +682,12 @@ async function init() {
     swingOffset = swing / 100 * (60 / tempo) / 2;
     lowpassDisplay.textContent = `${lowpassSlider.value} Hz`;
     highpassDisplay.textContent = `${highpassSlider.value} Hz`;
+    eqLowDisplay.textContent = `${eqLowSlider.value} dB`;
+    eqMidDisplay.textContent = `${eqMidSlider.value} dB`;
+    eqHighDisplay.textContent = `${eqHighSlider.value} dB`;
+    bassEqLowDisplay.textContent = `${bassEqLowSlider.value} dB`;
+    bassEqMidDisplay.textContent = `${bassEqMidSlider.value} dB`;
+    bassEqHighDisplay.textContent = `${bassEqHighSlider.value} dB`;
     document.getElementById('current-year').textContent = new Date().getFullYear();
 }
 
