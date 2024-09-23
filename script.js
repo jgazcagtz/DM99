@@ -15,7 +15,7 @@ const sounds = {
     hihatClosed: 'https://cdn.freesound.org/previews/638/638654_433684-lq.mp3',
     hihatOpened: 'https://cdn.freesound.org/previews/627/627344_13191763-lq.mp3',
     clap: 'https://cdn.freesound.org/previews/244/244568_165785-lq.mp3',
-    bass1: 'https://cdn.freesound.org/previews/711/711461_15225418-lq.mp3',  
+    bass1: 'https://cdn.freesound.org/previews/711/711469_15225418-lq.mp3',  
     tom: 'https://cdn.freesound.org/previews/443/443181_6979693-lq.mp3',
     perc1: 'https://cdn.freesound.org/previews/724/724509_11990934-lq.mp3',
     perc2: 'https://cdn.freesound.org/previews/503/503788_9637845-lq.mp3',
