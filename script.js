@@ -620,7 +620,7 @@ randomBassButton.addEventListener('click', () => {
     for (let i = 0; i < 16; i++) { // Generate 16 random steps
         firstHalf.push({
             active: Math.random() < 0.5,
-            pitch: Math.floor(Math.random() * 49) - 24 // Random pitch between -24 and +24
+            pitch: Math.floor(Math.random() * 49) - 12 // Random pitch between -24 and +24
         });
     }
     // Duplicate the 16 steps to make 32 steps
