@@ -5,7 +5,7 @@ const audioCtx = new AudioContext();
 // Define which instruments should be mono
 const monoInstruments = [
     'kick', 'snare', 'hihatClosed', 'hihatOpened', 'clap', 'tom',
-    'perc1', 'perc2', 'perc3', 'perc4', 'perc5', 'perc6','acid'
+    'perc1', 'perc2', 'perc3', 'perc4', 'perc5', 'perc6', 'acid'
 ];
 
 // Sound URLs
@@ -23,7 +23,7 @@ const sounds = {
     perc4: 'https://cdn.freesound.org/previews/352/352280_1866366-lq.mp3',
     perc5: 'https://cdn.freesound.org/previews/638/638557_12672694-lq.mp3',
     perc6: 'https://cdn.freesound.org/previews/707/707194_6295857-lq.mp3',
-  acid: 'https://cdn.freesound.org/previews/21/21998_45941-lq.mp3'
+    acid: 'https://cdn.freesound.org/previews/21/21998_45941-lq.mp3'
 };
 const buffers = {};
 
@@ -73,7 +73,6 @@ const drumMachine = document.getElementById('drum-machine');
 const playButton = document.getElementById('play');
 const stopButton = document.getElementById('stop');
 const randomBassButton = document.getElementById('random-bass');
-const downloadAudioButton = document.getElementById('download-audio');
 const tempoSlider = document.getElementById('tempo');
 const bpmDisplay = document.getElementById('bpm-display');
 const swingSlider = document.getElementById('swing');
@@ -133,43 +132,16 @@ const sequences = {
     perc4: new Array(32).fill(false),
     perc5: new Array(32).fill(false),
     perc6: new Array(32).fill(false),
-  acid: new Array(32).fill(false)
+    acid: new Array(32).fill(false)
 };
 
 // Mute and Solo States
-const mutedInstruments = {
-    kick: false,
-    snare: false,
-    hihatClosed: false,
-    hihatOpened: false,
-    clap: false,
-    bass1: false,
-    tom: false,
-    perc1: false,
-    perc2: false,
-    perc3: false,
-    perc4: false,
-    perc5: false,
-    perc6: false,
-  acid: false
-};
-
-const soloedInstruments = {
-    kick: false,
-    snare: false,
-    hihatClosed: false,
-    hihatOpened: false,
-    clap: false,
-    bass1: false,
-    tom: false,
-    perc1: false,
-    perc2: false,
-    perc3: false,
-    perc4: false,
-    perc5: false,
-    perc6: false,
-  acid: false
-};
+const mutedInstruments = {};
+const soloedInstruments = {};
+Object.keys(sequences).forEach(inst => {
+    mutedInstruments[inst] = false;
+    soloedInstruments[inst] = false;
+});
 
 // Instrument Volumes
 const instrumentVolumes = {
@@ -186,7 +158,7 @@ const instrumentVolumes = {
     perc4: 0.6,
     perc5: 0.6,
     perc6: 0.6,
-  acid: 0.6
+    acid: 0.6
 };
 
 // ADSR Parameters (only for Kick Drum and Hi-Hat)
@@ -283,6 +255,21 @@ Object.keys(instrumentVolumes).forEach(instrument => {
 // Preload Audio Buffers
 loadSounds();
 
+// Define bass scale pitches based on E0 sample to reach desired notes
+const minorScalePitches = [0, 2, 3, 5, 7, 8, 10]; // E natural minor: E, F#, G, A, B, C, D
+const phrygianScalePitches = [0, 1, 3, 5, 7, 8, 10]; // E Phrygian: E, F, G, A, B, C, D
+
+// Function to get bass scale pitches based on selected scale
+function getBassScalePitches(scale) {
+    if (scale === 'minor') {
+        return minorScalePitches;
+    } else if (scale === 'phrygian') {
+        return phrygianScalePitches;
+    } else {
+        return minorScalePitches; // Default to minor
+    }
+}
+
 // Generate Pads
 function generatePads() {
     drumMachine.innerHTML = '';
@@ -292,20 +279,6 @@ function generatePads() {
         pad.dataset.step = i + 1;
         pad.dataset.index = i;
 
-        if (currentInstrument === 'bass1') {
-            pad.addEventListener('click', () => {
-                const step = sequences[currentInstrument][i];
-                step.active = !step.active;
-                pad.classList.toggle('active', step.active);
-                updateBassKnob(pad, i);
-            });
-        } else {
-            pad.addEventListener('click', () => {
-                sequences[currentInstrument][i] = !sequences[currentInstrument][i];
-                pad.classList.toggle('active', sequences[currentInstrument][i]);
-            });
-        }
-
         drumMachine.appendChild(pad);
 
         if (currentInstrument === 'bass1') {
@@ -314,20 +287,38 @@ function generatePads() {
             knobContainer.classList.add('pitch-knob');
             pad.appendChild(knobContainer);
 
+            const step = sequences[currentInstrument][i];
+            const bassScalePitches = getBassScalePitches(step.scale || 'minor'); // Use the step's scale or default to 'minor'
+            const pitchIndex = bassScalePitches.indexOf(step.pitch);
             const knob = new Nexus.Dial(knobContainer, {
                 size: [40, 40],
-                min: -6,
-                max: 6,
+                min: 0,
+                max: bassScalePitches.length - 1,
                 step: 1,
-                value: sequences[currentInstrument][i].pitch
+                value: pitchIndex >= 0 ? pitchIndex : 0
             });
 
             knob.on('change', (v) => {
-                sequences[currentInstrument][i].pitch = v;
+                const index = Math.round(v);
+                sequences[currentInstrument][i].pitch = bassScalePitches[index];
             });
 
             knob.colorize("fill", "#00e676");
             knob.colorize("accent", "#00e676");
+
+            knobContainer.style.display = step.active ? 'block' : 'none';
+
+            pad.addEventListener('click', () => {
+                const step = sequences[currentInstrument][i];
+                step.active = !step.active;
+                pad.classList.toggle('active', step.active);
+                knobContainer.style.display = step.active ? 'block' : 'none';
+            });
+        } else {
+            pad.addEventListener('click', () => {
+                sequences[currentInstrument][i] = !sequences[currentInstrument][i];
+                pad.classList.toggle('active', sequences[currentInstrument][i]);
+            });
         }
     }
     updatePads();
@@ -554,7 +545,8 @@ function scheduleNote(beatNumber, time) {
         if (instrument === 'bass1') {
             const step = sequences[instrument][beatNumber];
             if (step.active) {
-                const pitch = Math.pow(2, step.pitch / 12);
+                const bassScalePitches = getBassScalePitches(step.scale || 'minor');
+                const pitch = Math.pow(2, (step.pitch - 12) / 12); // Adjusted to center around E0
                 playSound(buffers[instrument], adjustedTime, pitch, null, instrument, null);
             }
         } else {
@@ -616,15 +608,68 @@ stopButton.addEventListener('click', () => {
 
 // Random Bass Line Generator
 randomBassButton.addEventListener('click', () => {
-    const firstHalf = [];
-    for (let i = 0; i < 16; i++) { // Generate 16 random steps
-        firstHalf.push({
-            active: Math.random() < 0.5,
-            pitch: Math.floor(Math.random() * 49) - 6 // Random pitch between -24 and +24
-        });
+    const rhythmicPatterns = [
+        // Pattern 1: Common 4-on-the-floor
+        [true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false],
+        // Pattern 2: Breakbeat style
+        [true, false, true, false, false, true, false, false, true, false, true, false, false, true, false, false],
+        // Pattern 3: Syncopated
+        [false, true, false, true, false, false, true, false, true, false, false, true, false, true, false, false],
+        // Pattern 4: Sparse
+        [true, false, false, true, false, false, false, true, false, false, true, false, false, false, true, false],
+        // Pattern 5: Dense
+        [true, true, false, true, true, false, true, true, false, true, true, false, true, true, false, true],
+        // Pattern 6: Off-beat
+        [false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true],
+        // Pattern 7: Triplet feel
+        [true, false, false, true, false, false, true, false, false, true, false, false, true, false, false, true],
+        // Pattern 8: Funky
+        [true, false, true, false, true, false, false, true, false, true, false, true, false, true, false, false],
+        // Pattern 9: Swing
+        [true, false, false, true, false, false, true, false, false, true, false, false, true, false, false, true],
+        // Pattern 10: Random hits
+        [true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false],
+    ];
+
+    // Randomly select a rhythmic pattern
+    const rhythm = rhythmicPatterns[Math.floor(Math.random() * rhythmicPatterns.length)];
+
+    // Randomly select a scale: 'minor' or 'phrygian'
+    const scales = ['minor', 'phrygian'];
+    const selectedScale = scales[Math.floor(Math.random() * scales.length)];
+    const bassScalePitches = getBassScalePitches(selectedScale);
+
+    const pattern = [];
+    for (let i = 0; i < rhythm.length; i++) {
+        if (rhythm[i]) {
+            let pitch;
+            if (i === 0 || i === rhythm.length - 1) {
+                // Start and end with root note (0)
+                pitch = 0;
+            } else {
+                pitch = bassScalePitches[Math.floor(Math.random() * bassScalePitches.length)];
+            }
+            pattern.push({
+                active: true,
+                pitch: pitch,
+                scale: selectedScale
+            });
+        } else {
+            // Rest
+            pattern.push({
+                active: false,
+                pitch: 0,
+                scale: selectedScale
+            });
+        }
     }
-    // Duplicate the 16 steps to make 32 steps
-    sequences.bass1 = [...firstHalf, ...firstHalf];
+
+    // Repeat the pattern to fill 32 steps
+    sequences.bass1 = [];
+    for (let i = 0; i < 2; i++) {
+        sequences.bass1 = sequences.bass1.concat(pattern);
+    }
+
     if (currentInstrument === 'bass1') {
         generatePads();
     }
@@ -650,11 +695,6 @@ window.addEventListener('click', (e) => {
         modal.style.display = 'none';
     }
 });
-
-// Update Bass Knob Display
-function updateBassKnob(pad, index) {
-    // No action needed as the knob is already handled by NexusUI
-}
 
 // Initialize
 async function init() {
