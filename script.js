@@ -316,8 +316,8 @@ function generatePads() {
 
             const knob = new Nexus.Dial(knobContainer, {
                 size: [40, 40],
-                min: -24,
-                max: 24,
+                min: -12,
+                max: 12,
                 step: 1,
                 value: sequences[currentInstrument][i].pitch
             });
