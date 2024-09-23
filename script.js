@@ -316,7 +316,7 @@ function generatePads() {
 
             const knob = new Nexus.Dial(knobContainer, {
                 size: [40, 40],
-                min: -12,
+                min: -6,
                 max: 6,
                 step: 1,
                 value: sequences[currentInstrument][i].pitch
@@ -626,21 +626,6 @@ randomBassButton.addEventListener('click', () => {
     // Duplicate the 16 steps to make 32 steps
     sequences.bass1 = [...firstHalf, ...firstHalf];
     if (currentInstrument === 'bass1') {
-        generatePads();
-    }
-});
-// Random Bass Line Generator
-randomBassButton.addEventListener('click', () => {
-    const firstHalf = [];
-    for (let i = 0; i < 16; i++) { // Generate 16 random steps
-        firstHalf.push({
-            active: Math.random() < 0.5,
-            pitch: Math.floor(Math.random() * 49) - 6 // Random pitch between -24 and +24
-        });
-    }
-    // Duplicate the 16 steps to make 32 steps
-    sequences.bass1 = [...firstHalf, ...firstHalf];
-    if (currentInstrument === 'acid') {
         generatePads();
     }
 });
