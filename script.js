@@ -5,7 +5,7 @@ const audioCtx = new AudioContext();
 // Define which instruments should be mono
 const monoInstruments = [
     'kick', 'snare', 'hihatClosed', 'hihatOpened', 'clap', 'tom',
-    'perc1', 'perc2', 'perc3', 'perc4', 'perc5', 'perc6', 'acid'
+    'perc1', 'perc2', 'perc3', 'perc4', 'perc5', 'perc6', 'acid', 'bass1',
 ];
 
 // Sound URLs
