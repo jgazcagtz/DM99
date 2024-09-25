@@ -4,8 +4,7 @@ const audioCtx = new AudioContext();
 
 // Define which instruments should be mono
 const monoInstruments = [
-    'kick', 'snare', 'hihatClosed', 'hihatOpened', 'clap', 'tom',
-    'perc1', 'perc2', 'perc3', 'perc4', 'perc5', 'perc6', 'acid', 'bass1',
+    'kick', 'bass1',
 ];
 
 // Sound URLs
@@ -15,7 +14,7 @@ const sounds = {
     hihatClosed: 'https://cdn.freesound.org/previews/638/638654_433684-lq.mp3',
     hihatOpened: 'https://cdn.freesound.org/previews/627/627344_13191763-lq.mp3',
     clap: 'https://cdn.freesound.org/previews/244/244568_165785-lq.mp3',
-    bass1: 'https://cdn.freesound.org/previews/711/711469_15225418-lq.mp3',  
+    bass1: 'https://cdn.freesound.org/previews/711/711469_15225418-lq.mp3',
     tom: 'https://cdn.freesound.org/previews/443/443181_6979693-lq.mp3',
     perc1: 'https://cdn.freesound.org/previews/724/724509_11990934-lq.mp3',
     perc2: 'https://cdn.freesound.org/previews/503/503788_9637845-lq.mp3',
@@ -23,7 +22,8 @@ const sounds = {
     perc4: 'https://cdn.freesound.org/previews/352/352280_1866366-lq.mp3',
     perc5: 'https://cdn.freesound.org/previews/638/638557_12672694-lq.mp3',
     perc6: 'https://cdn.freesound.org/previews/707/707194_6295857-lq.mp3',
-    acid: 'https://cdn.freesound.org/previews/21/21998_45941-lq.mp3'
+    acid: 'https://cdn.freesound.org/previews/21/21998_45941-lq.mp3',
+    synth: 'https://cdn.freesound.org/previews/315/315610_2050105-lq.mp3', // New Synth Sample
 };
 const buffers = {};
 
@@ -65,57 +65,12 @@ async function loadSounds() {
 
 // Variables
 let currentInstrument = 'kick';
-const instrumentButtons = document.querySelectorAll('.instrument-button');
-const muteButtons = document.querySelectorAll('.mute-button');
-const soloButtons = document.querySelectorAll('.solo-button');
-const volumeSliders = document.querySelectorAll('.volume-slider');
-const drumMachine = document.getElementById('drum-machine');
-const playButton = document.getElementById('play');
-const stopButton = document.getElementById('stop');
-const randomBassButton = document.getElementById('random-bass');
-const tempoSlider = document.getElementById('tempo');
-const bpmDisplay = document.getElementById('bpm-display');
-const swingSlider = document.getElementById('swing');
-const swingDisplay = document.getElementById('swing-display');
-const lowpassSlider = document.getElementById('lowpass-filter');
-const lowpassDisplay = document.getElementById('lowpass-display');
-const highpassSlider = document.getElementById('highpass-filter');
-const highpassDisplay = document.getElementById('highpass-display');
-const eqLowSlider = document.getElementById('eq-low');
-const eqMidSlider = document.getElementById('eq-mid');
-const eqHighSlider = document.getElementById('eq-high');
-const eqLowDisplay = document.getElementById('eq-low-display');
-const eqMidDisplay = document.getElementById('eq-mid-display');
-const eqHighDisplay = document.getElementById('eq-high-display');
-const bassEqLowSlider = document.getElementById('bass-eq-low');
-const bassEqMidSlider = document.getElementById('bass-eq-mid');
-const bassEqHighSlider = document.getElementById('bass-eq-high');
-const bassEqLowDisplay = document.getElementById('bass-eq-low-display');
-const bassEqMidDisplay = document.getElementById('bass-eq-mid-display');
-const bassEqHighDisplay = document.getElementById('bass-eq-high-display');
-const showInstructionsButton = document.getElementById('show-instructions');
-const modal = document.getElementById('modal');
-const closeModalButton = document.getElementById('close-modal');
-const adsrToggle = document.getElementById('adsr-toggle');
-const adsrContent = document.getElementById('adsr-content');
-
 let isPlaying = false;
 let currentNote = 0;
 let tempo = 120;
 let swing = 0; // Swing percentage (0-100)
 let timerID;
 let swingOffset = 0;
-
-// Initialize swing and filter displays
-swingDisplay.textContent = `${swing}%`;
-lowpassDisplay.textContent = `${lowpassSlider.value} Hz`;
-highpassDisplay.textContent = `${highpassSlider.value} Hz`;
-eqLowDisplay.textContent = `${eqLowSlider.value} dB`;
-eqMidDisplay.textContent = `${eqMidSlider.value} dB`;
-eqHighDisplay.textContent = `${eqHighSlider.value} dB`;
-bassEqLowDisplay.textContent = `${bassEqLowSlider.value} dB`;
-bassEqMidDisplay.textContent = `${bassEqMidSlider.value} dB`;
-bassEqHighDisplay.textContent = `${bassEqHighSlider.value} dB`;
 
 // Sequences
 const sequences = {
@@ -132,7 +87,8 @@ const sequences = {
     perc4: new Array(32).fill(false),
     perc5: new Array(32).fill(false),
     perc6: new Array(32).fill(false),
-    acid: new Array(32).fill(false)
+    acid: new Array(32).fill(false),
+    synth: new Array(32).fill(false).map(() => ({ active: false, pitch: 0 })), // New Synth Sequence
 };
 
 // Mute and Solo States
@@ -158,14 +114,17 @@ const instrumentVolumes = {
     perc4: 0.6,
     perc5: 0.6,
     perc6: 0.6,
-    acid: 0.6
+    acid: 0.6,
+    synth: 0.6, // New Synth Volume
 };
 
-// ADSR Parameters (only for Kick Drum and Hi-Hat)
+// ADSR Parameters
 const adsrParameters = {
     kick: { attack: 0.1, decay: 0.3, sustain: 0.7, release: 0.5 },
     hihatClosed: { attack: 0.05, decay: 0.2, sustain: 0.5, release: 0.3 },
-    hihatOpened: { attack: 0.05, decay: 0.2, sustain: 0.5, release: 0.3 }
+    hihatOpened: { attack: 0.05, decay: 0.2, sustain: 0.5, release: 0.3 },
+    bass1: { attack: 0.1, decay: 0.3, sustain: 0.7, release: 0.5 }, // New ADSR for Bass
+    synth: { attack: 0.1, decay: 0.3, sustain: 0.7, release: 0.5 }, // New ADSR for Synth
 };
 
 // Master Volume Setup
@@ -183,12 +142,12 @@ masterCompressor.release.setValueAtTime(0.25, audioCtx.currentTime);
 // Master Low-Pass Filter
 const masterLowpass = audioCtx.createBiquadFilter();
 masterLowpass.type = 'lowpass';
-masterLowpass.frequency.value = lowpassSlider.value; // Initial value from slider
+masterLowpass.frequency.value = 20000; // Set initial frequency
 
 // Master High-Pass Filter
 const masterHighpass = audioCtx.createBiquadFilter();
 masterHighpass.type = 'highpass';
-masterHighpass.frequency.value = highpassSlider.value; // Initial value from slider
+masterHighpass.frequency.value = 20; // Set initial frequency
 
 // Equalizer Filters
 const eqFilters = {
@@ -240,7 +199,7 @@ const instrumentGainNodes = {};
 Object.keys(instrumentVolumes).forEach(instrument => {
     const gainNode = audioCtx.createGain();
     gainNode.gain.value = instrumentVolumes[instrument];
-    if (instrument === 'bass1') {
+    if (instrument === 'bass1' || instrument === 'synth') {
         // Connect Bass EQ Filters
         gainNode.connect(bassEqFilters.low);
         bassEqFilters.low.connect(bassEqFilters.mid);
@@ -252,15 +211,12 @@ Object.keys(instrumentVolumes).forEach(instrument => {
     instrumentGainNodes[instrument] = gainNode;
 });
 
-// Preload Audio Buffers
-loadSounds();
-
-// Define bass scale pitches based on E0 sample to reach desired notes
+// Define scale pitches based on E0 sample to reach desired notes
 const minorScalePitches = [0, 2, 3, 5, 7, 8, 10]; // E natural minor: E, F#, G, A, B, C, D
 const phrygianScalePitches = [0, 1, 3, 5, 7, 8, 10]; // E Phrygian: E, F, G, A, B, C, D
 
-// Function to get bass scale pitches based on selected scale
-function getBassScalePitches(scale) {
+// Function to get scale pitches based on selected scale
+function getScalePitches(scale) {
     if (scale === 'minor') {
         return minorScalePitches;
     } else if (scale === 'phrygian') {
@@ -270,8 +226,258 @@ function getBassScalePitches(scale) {
     }
 }
 
+// Initialize the application
+async function init() {
+    // Wait for DOM to be fully loaded
+    await loadSounds();
+
+    // DOM Elements
+    const instrumentButtons = document.querySelectorAll('.instrument-button');
+    const muteButtons = document.querySelectorAll('.mute-button');
+    const soloButtons = document.querySelectorAll('.solo-button');
+    const volumeSliders = document.querySelectorAll('.volume-slider');
+    const drumMachine = document.getElementById('drum-machine');
+    const playButton = document.getElementById('play');
+    const stopButton = document.getElementById('stop');
+    const randomBassButton = document.getElementById('random-bass');
+    const randomSynthButton = document.getElementById('random-synth');
+    const tempoSlider = document.getElementById('tempo');
+    const bpmDisplay = document.getElementById('bpm-display');
+    const swingSlider = document.getElementById('swing');
+    const swingDisplay = document.getElementById('swing-display');
+    const lowpassSlider = document.getElementById('lowpass-filter');
+    const lowpassDisplay = document.getElementById('lowpass-display');
+    const highpassSlider = document.getElementById('highpass-filter');
+    const highpassDisplay = document.getElementById('highpass-display');
+    const eqLowSlider = document.getElementById('eq-low');
+    const eqMidSlider = document.getElementById('eq-mid');
+    const eqHighSlider = document.getElementById('eq-high');
+    const eqLowDisplay = document.getElementById('eq-low-display');
+    const eqMidDisplay = document.getElementById('eq-mid-display');
+    const eqHighDisplay = document.getElementById('eq-high-display');
+    const bassEqLowSlider = document.getElementById('bass-eq-low');
+    const bassEqMidSlider = document.getElementById('bass-eq-mid');
+    const bassEqHighSlider = document.getElementById('bass-eq-high');
+    const bassEqLowDisplay = document.getElementById('bass-eq-low-display');
+    const bassEqMidDisplay = document.getElementById('bass-eq-mid-display');
+    const bassEqHighDisplay = document.getElementById('bass-eq-high-display');
+    const showInstructionsButton = document.getElementById('show-instructions');
+    const modal = document.getElementById('modal');
+    const closeModalButton = document.getElementById('close-modal');
+    const adsrToggle = document.getElementById('adsr-toggle');
+    const adsrContent = document.getElementById('adsr-content');
+    const masterVolumeSlider = document.getElementById('master-volume');
+
+    // Initialize swing and filter displays
+    swingDisplay.textContent = `${swing}%`;
+    lowpassDisplay.textContent = `${lowpassSlider.value} Hz`;
+    highpassDisplay.textContent = `${highpassSlider.value} Hz`;
+    eqLowDisplay.textContent = `${eqLowSlider.value} dB`;
+    eqMidDisplay.textContent = `${eqMidSlider.value} dB`;
+    eqHighDisplay.textContent = `${eqHighSlider.value} dB`;
+    bassEqLowDisplay.textContent = `${bassEqLowSlider.value} dB`;
+    bassEqMidDisplay.textContent = `${bassEqMidSlider.value} dB`;
+    bassEqHighDisplay.textContent = `${bassEqHighSlider.value} dB`;
+
+    generatePads();
+    instrumentButtons[0].classList.add('active');
+    updatePads();
+
+    bpmDisplay.textContent = tempo;
+    swingDisplay.textContent = `${swing}%`;
+    swingOffset = swing / 100 * (60 / tempo) / 2;
+    lowpassDisplay.textContent = `${lowpassSlider.value} Hz`;
+    highpassDisplay.textContent = `${highpassSlider.value} Hz`;
+    eqLowDisplay.textContent = `${eqLowSlider.value} dB`;
+    eqMidDisplay.textContent = `${eqMidSlider.value} dB`;
+    eqHighDisplay.textContent = `${eqHighSlider.value} dB`;
+    bassEqLowDisplay.textContent = `${bassEqLowSlider.value} dB`;
+    bassEqMidDisplay.textContent = `${bassEqMidSlider.value} dB`;
+    bassEqHighDisplay.textContent = `${bassEqHighSlider.value} dB`;
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Set initial filter frequencies based on slider values
+    masterLowpass.frequency.value = parseInt(lowpassSlider.value);
+    masterHighpass.frequency.value = parseInt(highpassSlider.value);
+
+    // Now, move all event listeners and functions that use DOM elements inside init()
+
+    // Instrument Button Events
+    instrumentButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            instrumentButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            currentInstrument = button.dataset.instrument;
+            generatePads();
+        });
+    });
+
+    // Mute Button Events
+    muteButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const instrument = button.dataset.instrument;
+            mutedInstruments[instrument] = !mutedInstruments[instrument];
+            button.classList.toggle('muted', mutedInstruments[instrument]);
+            updateGainNodes();
+        });
+    });
+
+    // Solo Button Events
+    soloButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const instrument = button.dataset.instrument;
+            soloedInstruments[instrument] = !soloedInstruments[instrument];
+            button.classList.toggle('active', soloedInstruments[instrument]);
+            updateGainNodes();
+        });
+    });
+
+    // Volume Slider Events
+    volumeSliders.forEach(slider => {
+        slider.addEventListener('input', () => {
+            const instrument = slider.dataset.instrument;
+            instrumentVolumes[instrument] = parseFloat(slider.value);
+            instrumentGainNodes[instrument].gain.value = instrumentVolumes[instrument];
+            updateGainNodes();
+        });
+    });
+
+    // Master Volume Control
+    masterVolumeSlider.addEventListener('input', () => {
+        masterGain.gain.value = parseFloat(masterVolumeSlider.value) * 0.8; // Adjust for initial 0.8
+    });
+
+    // ADSR Slider Events
+    const adsrSliders = document.querySelectorAll('.adsr-slider');
+    adsrSliders.forEach(slider => {
+        slider.addEventListener('input', () => {
+            const instrument = slider.dataset.instrument;
+            const param = slider.dataset.param;
+            if (adsrParameters[instrument]) {
+                adsrParameters[instrument][param] = parseFloat(slider.value);
+            }
+        });
+    });
+
+    // Low-Pass Filter Slider Event
+    lowpassSlider.addEventListener('input', () => {
+        const freq = parseInt(lowpassSlider.value);
+        masterLowpass.frequency.value = freq;
+        lowpassDisplay.textContent = `${freq} Hz`;
+    });
+
+    // High-Pass Filter Slider Event
+    highpassSlider.addEventListener('input', () => {
+        const freq = parseInt(highpassSlider.value);
+        masterHighpass.frequency.value = freq;
+        highpassDisplay.textContent = `${freq} Hz`;
+    });
+
+    // Equalizer Slider Events
+    eqLowSlider.addEventListener('input', () => {
+        const gain = parseInt(eqLowSlider.value);
+        eqFilters.low.gain.value = gain;
+        eqLowDisplay.textContent = `${gain} dB`;
+    });
+
+    eqMidSlider.addEventListener('input', () => {
+        const gain = parseInt(eqMidSlider.value);
+        eqFilters.mid.gain.value = gain;
+        eqMidDisplay.textContent = `${gain} dB`;
+    });
+
+    eqHighSlider.addEventListener('input', () => {
+        const gain = parseInt(eqHighSlider.value);
+        eqFilters.high.gain.value = gain;
+        eqHighDisplay.textContent = `${gain} dB`;
+    });
+
+    // Bass EQ Slider Events
+    bassEqLowSlider.addEventListener('input', () => {
+        const gain = parseInt(bassEqLowSlider.value);
+        bassEqFilters.low.gain.value = gain;
+        bassEqLowDisplay.textContent = `${gain} dB`;
+    });
+
+    bassEqMidSlider.addEventListener('input', () => {
+        const gain = parseInt(bassEqMidSlider.value);
+        bassEqFilters.mid.gain.value = gain;
+        bassEqMidDisplay.textContent = `${gain} dB`;
+    });
+
+    bassEqHighSlider.addEventListener('input', () => {
+        const gain = parseInt(bassEqHighSlider.value);
+        bassEqFilters.high.gain.value = gain;
+        bassEqHighDisplay.textContent = `${gain} dB`;
+    });
+
+    // Swing Slider Event
+    swingSlider.addEventListener('input', () => {
+        swing = parseInt(swingSlider.value);
+        swingDisplay.textContent = `${swing}%`;
+        swingOffset = swing / 100 * (60 / tempo) / 2; // Calculate swing offset based on tempo
+    });
+
+    // Adjust Tempo
+    tempoSlider.addEventListener('input', () => {
+        tempo = parseInt(tempoSlider.value);
+        bpmDisplay.textContent = tempo;
+        // Recalculate swing offset based on new tempo
+        swingOffset = swing / 100 * (60 / tempo) / 2;
+    });
+
+    // Play/Stop Button Events
+    playButton.addEventListener('click', async () => {
+        if (audioCtx.state === 'suspended') {
+            await audioCtx.resume();
+        }
+        startPlaying();
+    });
+
+    stopButton.addEventListener('click', () => {
+        stopPlaying();
+    });
+
+    // Random Bass Line Generator
+    randomBassButton.addEventListener('click', () => {
+        generateRandomSequence('bass1');
+    });
+
+    // Random Synth Line Generator
+    randomSynthButton.addEventListener('click', () => {
+        generateRandomSequence('synth');
+    });
+
+    // ADSR Controls Toggle
+    adsrToggle.addEventListener('click', () => {
+        adsrContent.style.display = adsrContent.style.display === 'block' ? 'none' : 'block';
+        adsrToggle.textContent = adsrContent.style.display === 'block' ? 'ADSR Controls ▲' : 'ADSR Controls ▼';
+    });
+
+    // Instructions Modal Events
+    showInstructionsButton.addEventListener('click', () => {
+        modal.style.display = 'flex';
+    });
+
+    closeModalButton.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target == modal) {
+            modal.style.display = 'none';
+        }
+    });
+}
+
+// Call init() after the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    init();
+});
+
 // Generate Pads
 function generatePads() {
+    const drumMachine = document.getElementById('drum-machine');
     drumMachine.innerHTML = '';
     for (let i = 0; i < 32; i++) { // 32 pads
         const pad = document.createElement('div');
@@ -281,26 +487,26 @@ function generatePads() {
 
         drumMachine.appendChild(pad);
 
-        if (currentInstrument === 'bass1') {
-            // Create pitch knob for bass
+        if (currentInstrument === 'bass1' || currentInstrument === 'synth') {
+            // Create pitch knob
             const knobContainer = document.createElement('div');
             knobContainer.classList.add('pitch-knob');
             pad.appendChild(knobContainer);
 
             const step = sequences[currentInstrument][i];
-            const bassScalePitches = getBassScalePitches(step.scale || 'minor'); // Use the step's scale or default to 'minor'
-            const pitchIndex = bassScalePitches.indexOf(step.pitch);
+            const scalePitches = getScalePitches(step.scale || 'minor'); // Use the step's scale or default to 'minor'
+            const pitchIndex = scalePitches.indexOf(step.pitch);
             const knob = new Nexus.Dial(knobContainer, {
                 size: [40, 40],
                 min: 0,
-                max: bassScalePitches.length - 1,
+                max: scalePitches.length - 1,
                 step: 1,
                 value: pitchIndex >= 0 ? pitchIndex : 0
             });
 
             knob.on('change', (v) => {
                 const index = Math.round(v);
-                sequences[currentInstrument][i].pitch = bassScalePitches[index];
+                sequences[currentInstrument][i].pitch = scalePitches[index];
             });
 
             knob.colorize("fill", "#00e676");
@@ -328,130 +534,13 @@ function generatePads() {
 function updatePads() {
     const pads = document.querySelectorAll('.pad');
     pads.forEach((pad, index) => {
-        if (currentInstrument === 'bass1') {
+        if (currentInstrument === 'bass1' || currentInstrument === 'synth') {
             pad.classList.toggle('active', sequences[currentInstrument][index].active);
         } else {
             pad.classList.toggle('active', sequences[currentInstrument][index]);
         }
     });
 }
-
-// Instrument Button Events
-instrumentButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        instrumentButtons.forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        currentInstrument = button.dataset.instrument;
-        generatePads();
-    });
-});
-
-// Mute Button Events
-muteButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        const instrument = button.dataset.instrument;
-        mutedInstruments[instrument] = !mutedInstruments[instrument];
-        button.classList.toggle('muted', mutedInstruments[instrument]);
-        updateGainNodes();
-    });
-});
-
-// Solo Button Events
-soloButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        const instrument = button.dataset.instrument;
-        soloedInstruments[instrument] = !soloedInstruments[instrument];
-        button.classList.toggle('active', soloedInstruments[instrument]);
-        updateGainNodes();
-    });
-});
-
-// Volume Slider Events
-volumeSliders.forEach(slider => {
-    slider.addEventListener('input', () => {
-        const instrument = slider.dataset.instrument;
-        instrumentVolumes[instrument] = parseFloat(slider.value);
-        instrumentGainNodes[instrument].gain.value = instrumentVolumes[instrument];
-        updateGainNodes();
-    });
-});
-
-// Master Volume Control
-const masterVolumeSlider = document.getElementById('master-volume');
-masterVolumeSlider.addEventListener('input', () => {
-    masterGain.gain.value = parseFloat(masterVolumeSlider.value) * 0.8; // Adjust for initial 0.8
-});
-
-// ADSR Slider Events (only for Kick Drum and Hi-Hat)
-const adsrSliders = document.querySelectorAll('.adsr-slider');
-adsrSliders.forEach(slider => {
-    slider.addEventListener('input', () => {
-        const instrument = slider.dataset.instrument;
-        const param = slider.dataset.param;
-        if (adsrParameters[instrument]) {
-            adsrParameters[instrument][param] = parseFloat(slider.value);
-        }
-    });
-});
-
-// Low-Pass Filter Slider Event
-lowpassSlider.addEventListener('input', () => {
-    const freq = parseInt(lowpassSlider.value);
-    masterLowpass.frequency.value = freq;
-    lowpassDisplay.textContent = `${freq} Hz`;
-});
-
-// High-Pass Filter Slider Event
-highpassSlider.addEventListener('input', () => {
-    const freq = parseInt(highpassSlider.value);
-    masterHighpass.frequency.value = freq;
-    highpassDisplay.textContent = `${freq} Hz`;
-});
-
-// Equalizer Slider Events
-eqLowSlider.addEventListener('input', () => {
-    const gain = parseInt(eqLowSlider.value);
-    eqFilters.low.gain.value = gain;
-    eqLowDisplay.textContent = `${gain} dB`;
-});
-
-eqMidSlider.addEventListener('input', () => {
-    const gain = parseInt(eqMidSlider.value);
-    eqFilters.mid.gain.value = gain;
-    eqMidDisplay.textContent = `${gain} dB`;
-});
-
-eqHighSlider.addEventListener('input', () => {
-    const gain = parseInt(eqHighSlider.value);
-    eqFilters.high.gain.value = gain;
-    eqHighDisplay.textContent = `${gain} dB`;
-});
-
-// Bass EQ Slider Events
-bassEqLowSlider.addEventListener('input', () => {
-    const gain = parseInt(bassEqLowSlider.value);
-    bassEqFilters.low.gain.value = gain;
-    bassEqLowDisplay.textContent = `${gain} dB`;
-});
-
-bassEqMidSlider.addEventListener('input', () => {
-    const gain = parseInt(bassEqMidSlider.value);
-    bassEqFilters.mid.gain.value = gain;
-    bassEqMidDisplay.textContent = `${gain} dB`;
-});
-
-bassEqHighSlider.addEventListener('input', () => {
-    const gain = parseInt(bassEqHighSlider.value);
-    bassEqFilters.high.gain.value = gain;
-    bassEqHighDisplay.textContent = `${gain} dB`;
-});
-
-// Swing Slider Event
-swingSlider.addEventListener('input', () => {
-    swing = parseInt(swingSlider.value);
-    swingDisplay.textContent = `${swing}%`;
-    swingOffset = swing / 100 * (60 / tempo) / 2; // Calculate swing offset based on tempo
-});
 
 // Update Gain Nodes based on Mute and Solo States
 function updateGainNodes() {
@@ -542,12 +631,16 @@ function scheduleNote(beatNumber, time) {
     Object.keys(sequences).forEach(instrument => {
         if (mutedInstruments[instrument] || (isAnySoloedFunction() && !soloedInstruments[instrument])) return;
 
-        if (instrument === 'bass1') {
+        if (instrument === 'bass1' || instrument === 'synth') {
             const step = sequences[instrument][beatNumber];
             if (step.active) {
-                const bassScalePitches = getBassScalePitches(step.scale || 'minor');
+                const scalePitches = getScalePitches(step.scale || 'minor');
                 const pitch = Math.pow(2, (step.pitch - 12) / 12); // Adjusted to center around E0
-                playSound(buffers[instrument], adjustedTime, pitch, null, instrument, null);
+                let adsr = null;
+                if (adsrParameters[instrument]) {
+                    adsr = adsrParameters[instrument];
+                }
+                playSound(buffers[instrument], adjustedTime, pitch, null, instrument, adsr);
             }
         } else {
             if (sequences[instrument][beatNumber]) {
@@ -586,28 +679,8 @@ function stopPlaying() {
     }
 }
 
-// Adjust Tempo
-tempoSlider.addEventListener('input', () => {
-    tempo = parseInt(tempoSlider.value);
-    bpmDisplay.textContent = tempo;
-    // Recalculate swing offset based on new tempo
-    swingOffset = swing / 100 * (60 / tempo) / 2;
-});
-
-// Play/Stop Button Events
-playButton.addEventListener('click', async () => {
-    if (audioCtx.state === 'suspended') {
-        await audioCtx.resume();
-    }
-    startPlaying();
-});
-
-stopButton.addEventListener('click', () => {
-    stopPlaying();
-});
-
-// Random Bass Line Generator
-randomBassButton.addEventListener('click', () => {
+// Function to generate random sequence
+function generateRandomSequence(instrument) {
     const rhythmicPatterns = [
         // Pattern 1: Common 4-on-the-floor
         [true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false],
@@ -637,7 +710,7 @@ randomBassButton.addEventListener('click', () => {
     // Randomly select a scale: 'minor' or 'phrygian'
     const scales = ['minor', 'phrygian'];
     const selectedScale = scales[Math.floor(Math.random() * scales.length)];
-    const bassScalePitches = getBassScalePitches(selectedScale);
+    const scalePitches = getScalePitches(selectedScale);
 
     const pattern = [];
     for (let i = 0; i < rhythm.length; i++) {
@@ -647,7 +720,7 @@ randomBassButton.addEventListener('click', () => {
                 // Start and end with root note (0)
                 pitch = 0;
             } else {
-                pitch = bassScalePitches[Math.floor(Math.random() * bassScalePitches.length)];
+                pitch = scalePitches[Math.floor(Math.random() * scalePitches.length)];
             }
             pattern.push({
                 active: true,
@@ -665,55 +738,12 @@ randomBassButton.addEventListener('click', () => {
     }
 
     // Repeat the pattern to fill 32 steps
-    sequences.bass1 = [];
+    sequences[instrument] = [];
     for (let i = 0; i < 2; i++) {
-        sequences.bass1 = sequences.bass1.concat(pattern);
+        sequences[instrument] = sequences[instrument].concat(pattern);
     }
 
-    if (currentInstrument === 'bass1') {
+    if (currentInstrument === instrument) {
         generatePads();
     }
-});
-
-// ADSR Controls Toggle
-adsrToggle.addEventListener('click', () => {
-    adsrContent.style.display = adsrContent.style.display === 'block' ? 'none' : 'block';
-    adsrToggle.textContent = adsrContent.style.display === 'block' ? 'ADSR Controls ▲' : 'ADSR Controls ▼';
-});
-
-// Instructions Modal Events
-showInstructionsButton.addEventListener('click', () => {
-    modal.style.display = 'flex';
-});
-
-closeModalButton.addEventListener('click', () => {
-    modal.style.display = 'none';
-});
-
-window.addEventListener('click', (e) => {
-    if (e.target == modal) {
-        modal.style.display = 'none';
-    }
-});
-
-// Initialize
-async function init() {
-    await loadSounds();
-    generatePads();
-    instrumentButtons[0].classList.add('active');
-    updatePads();
-    bpmDisplay.textContent = tempo;
-    swingDisplay.textContent = `${swing}%`;
-    swingOffset = swing / 100 * (60 / tempo) / 2;
-    lowpassDisplay.textContent = `${lowpassSlider.value} Hz`;
-    highpassDisplay.textContent = `${highpassSlider.value} Hz`;
-    eqLowDisplay.textContent = `${eqLowSlider.value} dB`;
-    eqMidDisplay.textContent = `${eqMidSlider.value} dB`;
-    eqHighDisplay.textContent = `${eqHighSlider.value} dB`;
-    bassEqLowDisplay.textContent = `${bassEqLowSlider.value} dB`;
-    bassEqMidDisplay.textContent = `${bassEqMidSlider.value} dB`;
-    bassEqHighDisplay.textContent = `${bassEqHighSlider.value} dB`;
-    document.getElementById('current-year').textContent = new Date().getFullYear();
 }
-
-init();
