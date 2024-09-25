@@ -38,7 +38,7 @@ body {
 
 /* Instrument Selector */
 .instrument-selector {
-  font-family: "Black Ops One", system-ui;
+    font-family: "Black Ops One", system-ui;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -46,7 +46,7 @@ body {
 }
 
 .instrument-container {
-  font-family: "Black Ops One", system-ui;
+    font-family: "Black Ops One", system-ui;
     display: flex;
     align-items: center;
     margin: 5px 10px;
@@ -56,7 +56,7 @@ body {
 .instrument-button,
 .solo-button,
 .mute-button {
-  font-family: "Black Ops One", system-ui;
+    font-family: "Black Ops One", system-ui;
     background-color: #1e1e1e;
     border: 2px solid #424242;
     color: #e0e0e0;
@@ -168,7 +168,7 @@ body {
 
 /* Controls */
 #controls {
-  font-family: "Black Ops One", system-ui;
+    font-family: "Black Ops One", system-ui;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -181,7 +181,7 @@ body {
 }
 
 button.control-button {
-  font-family: "Black Ops One", system-ui;
+    font-family: "Black Ops One", system-ui;
     background-color: #1e1e1e;
     border: 2px solid #424242;
     color: #e0e0e0;
