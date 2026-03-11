@@ -55,13 +55,21 @@ const INSTRUMENTS = [
     { id: 'synth', label: 'Synth', group: 'Tonal', volume: 0.6, pitched: true,
       url: 'https://cdn.freesound.org/previews/315/315610_2050105-lq.mp3',
       adsr: { attack: 0.05, decay: 0.3, sustain: 0.7, release: 0.5 } },
-    // --- Synth (oscillator-based, pitched) ---
+    // --- Synth (Tone.js powered, pitched) ---
     { id: 'sub', label: 'Sub', group: 'Synth', volume: 0.6, pitched: true,
-      synth: { waveform: 'sine', baseFreq: 41.2 },
+      tone: { type: 'Synth', options: { oscillator: { type: 'sine' }, envelope: { attack: 0.01, decay: 0.5, sustain: 0.8, release: 0.3 } } },
       adsr: { attack: 0.01, decay: 0.5, sustain: 0.8, release: 0.3 } },
     { id: 'tr808', label: '808', group: 'Synth', volume: 0.6, pitched: true,
-      synth: { waveform: 'triangle', baseFreq: 55, pitchDecay: true },
+      tone: { type: 'MembraneSynth', options: { pitchDecay: 0.05, octaves: 4, envelope: { attack: 0.001, decay: 0.8, sustain: 0, release: 0.1 } } },
       adsr: { attack: 0.001, decay: 0.8, sustain: 0.0, release: 0.1 } },
+    { id: 'fmBass', label: 'FM', group: 'Synth', volume: 0.5, pitched: true,
+      tone: { type: 'FMSynth', options: { harmonicity: 3, modulationIndex: 10, envelope: { attack: 0.01, decay: 0.2, sustain: 0.5, release: 0.3 } } },
+      adsr: { attack: 0.01, decay: 0.2, sustain: 0.5, release: 0.3 } },
+    { id: 'pluck', label: 'Pluck', group: 'Synth', volume: 0.5, pitched: true,
+      tone: { type: 'PluckSynth', options: { attackNoise: 1, dampening: 4000, resonance: 0.9 } } },
+    { id: 'amPad', label: 'AM', group: 'Synth', volume: 0.5, pitched: true,
+      tone: { type: 'AMSynth', options: { harmonicity: 2, envelope: { attack: 0.1, decay: 0.3, sustain: 0.7, release: 0.5 } } },
+      adsr: { attack: 0.1, decay: 0.3, sustain: 0.7, release: 0.5 } },
 ];
 
 // Build lookup map
@@ -135,10 +143,27 @@ const instrumentGainNodes = {};
 INSTRUMENTS.forEach(inst => {
     const gn = audioCtx.createGain();
     gn.gain.value = inst.volume;
-    // Route pitched/synth instruments through bass EQ, others direct to master
-    gn.connect((inst.pitched || inst.synth) ? bassEqFilters.low : masterGain);
+    // Route pitched/tone instruments through bass EQ, others direct to master
+    gn.connect((inst.pitched || inst.tone) ? bassEqFilters.low : masterGain);
     instrumentGainNodes[inst.id] = gn;
 });
+
+// ============= TONE.JS SYNTH ENGINE =============
+const toneInstruments = {};
+function initToneJS() {
+    if (typeof Tone === 'undefined') { console.warn('Tone.js not loaded'); return; }
+    Tone.setContext(audioCtx);
+    INSTRUMENTS.filter(i => i.tone).forEach(inst => {
+        try {
+            const ToneClass = Tone[inst.tone.type];
+            if (!ToneClass) return;
+            const synth = new ToneClass(inst.tone.options || {});
+            synth.disconnect();
+            synth.connect(instrumentGainNodes[inst.id]);
+            toneInstruments[inst.id] = synth;
+        } catch(e) { console.warn(`Tone.js ${inst.tone.type} failed:`, e); }
+    });
+}
 
 // ============= STATE =============
 let currentInstrument = 'kick';
@@ -242,36 +267,26 @@ function playSound(buffer, time, playbackRate, duration, instrumentId, adsr) {
     return source;
 }
 
-// ============= PLAY SYNTH NOTE (oscillator-based) =============
-function playSynthNote(instConfig, time, pitch) {
-    const sd = instConfig.synth;
-    const adsr = adsrParams[instConfig.id] || { attack: 0.01, decay: 0.3, sustain: 0.5, release: 0.2 };
-    const freq = Math.max(20, sd.baseFreq * Math.pow(2, (pitch - 12) / 12));
+// ============= PLAY TONE.JS NOTE =============
+function playToneNote(instConfig, time, pitch) {
+    const synth = toneInstruments[instConfig.id];
+    if (!synth) return;
+    const adsr = adsrParams[instConfig.id];
+    const baseFreq = 41.2; // E1
+    const freq = Math.max(20, baseFreq * Math.pow(2, (pitch - 12) / 12));
 
-    const osc = audioCtx.createOscillator();
-    const envGain = audioCtx.createGain();
-
-    osc.type = sd.waveform;
-    osc.frequency.setValueAtTime(freq, time);
-    if (sd.pitchDecay) {
-        osc.frequency.exponentialRampToValueAtTime(Math.max(freq * 0.2, 20), time + 0.4);
+    // Sync ADSR sliders to Tone.js envelope
+    if (adsr && synth.envelope) {
+        try {
+            synth.envelope.attack = adsr.attack;
+            synth.envelope.decay = adsr.decay;
+            synth.envelope.sustain = adsr.sustain;
+            synth.envelope.release = adsr.release;
+        } catch(e) {}
     }
 
-    const a = adsr.attack, d = adsr.decay, s = adsr.sustain, r = adsr.release;
-    envGain.gain.setValueAtTime(0, time);
-    envGain.gain.linearRampToValueAtTime(1, time + a);
-    envGain.gain.linearRampToValueAtTime(Math.max(s, 0.001), time + a + d);
-    const holdEnd = time + a + d + 0.05;
-    envGain.gain.setValueAtTime(Math.max(s, 0.001), holdEnd);
-    envGain.gain.linearRampToValueAtTime(0.001, holdEnd + r);
-
-    osc.connect(envGain);
-    envGain.connect(instrumentGainNodes[instConfig.id]);
-
-    const stopTime = holdEnd + r + 0.05;
-    osc.start(time);
-    osc.stop(stopTime);
-    osc.onended = () => { osc.disconnect(); envGain.disconnect(); };
+    const dur = adsr ? Math.max(adsr.attack + adsr.decay + 0.05, 0.1) : 0.2;
+    try { synth.triggerAttackRelease(freq, dur, time); } catch(e) {}
 }
 
 // ============= SCHEDULER =============
@@ -314,8 +329,8 @@ function scheduleNote(step, time) {
 
         const adsr = adsrParams[inst.id] || null;
 
-        if (inst.synth) {
-            playSynthNote(inst, adjustedTime, s.pitch);
+        if (inst.tone) {
+            playToneNote(inst, adjustedTime, s.pitch);
         } else if (inst.pitched) {
             const rate = Math.pow(2, (s.pitch - 12) / 12);
             playSound(buffers[inst.id], adjustedTime, rate, null, inst.id, adsr);
@@ -636,6 +651,57 @@ function showToast(msg) {
     toastTimeout = setTimeout(() => el.classList.remove('visible'), 2000);
 }
 
+// ============= FREESOUND API =============
+const SEARCH_TERMS = {
+    kick: 'kick drum one shot', snare: 'snare drum one shot',
+    clap: 'clap percussion one shot', tom: 'tom drum one shot',
+    rimshot: 'rimshot percussion', cowbell: 'cowbell one shot',
+    hihatClosed: 'closed hi-hat one shot', hihatOpened: 'open hi-hat one shot',
+    crash: 'crash cymbal one shot', ride: 'ride cymbal one shot',
+    perc1: 'percussion hit', perc2: 'wood block percussion',
+    perc3: 'bongo drum one shot', perc4: 'conga drum one shot',
+    perc5: 'guiro percussion', perc6: 'agogo bell',
+    shaker: 'shaker percussion one shot', tamb: 'tambourine one shot',
+    bass1: 'bass synth one shot', acid: 'acid 303 one shot',
+    synth: 'synth stab one shot'
+};
+
+async function searchFreesound(query, apiKey) {
+    const url = `https://freesound.org/apiv2/search/text/?query=${encodeURIComponent(query)}&token=${apiKey}&fields=id,name,previews&page_size=1&filter=duration:[0 TO 3]`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`Freesound API ${resp.status}`);
+    const data = await resp.json();
+    if (data.results && data.results.length > 0) {
+        return data.results[0].previews['preview-hq-mp3'];
+    }
+    return null;
+}
+
+async function fixMissingSamples() {
+    const apiKey = localStorage.getItem('dm99-freesound-key');
+    if (!apiKey) { showToast('Set your Freesound API key in ⚙️ Settings first'); return; }
+
+    const missing = INSTRUMENTS.filter(i => i.url && !buffers[i.id]);
+    if (missing.length === 0) { showToast('All samples loaded ✓'); return; }
+
+    showToast(`Searching Freesound for ${missing.length} missing samples...`);
+    let found = 0;
+
+    for (const inst of missing) {
+        const term = SEARCH_TERMS[inst.id] || inst.label;
+        try {
+            const previewUrl = await searchFreesound(term, apiKey);
+            if (previewUrl) {
+                const resp = await fetch(previewUrl);
+                const ab = await resp.arrayBuffer();
+                buffers[inst.id] = await audioCtx.decodeAudioData(ab);
+                found++;
+            }
+        } catch(e) { console.warn(`Freesound: ${inst.label} failed`, e); }
+    }
+    showToast(found > 0 ? `Found ${found}/${missing.length} samples via Freesound ✓` : 'No samples found — try different search terms');
+}
+
 // ============= KEYBOARD SHORTCUTS =============
 function setupKeyboard() {
     document.addEventListener('keydown', (e) => {
@@ -672,10 +738,20 @@ async function init() {
     setTimeout(() => { loadingScreen.style.display = 'none'; }, 500);
     document.getElementById('app').classList.remove('hidden');
 
+    // Initialize Tone.js synth engine
+    initToneJS();
+
     // Generate dynamic UI
     generateInstrumentPanel();
     generatePads();
     generateADSR();
+
+    // Auto-fix missing samples if API key exists
+    const savedKey = localStorage.getItem('dm99-freesound-key');
+    if (savedKey) {
+        const missing = INSTRUMENTS.filter(i => i.url && !buffers[i.id]);
+        if (missing.length > 0) fixMissingSamples();
+    }
 
     // Footer year
     document.getElementById('current-year').textContent = new Date().getFullYear();
@@ -777,6 +853,32 @@ async function init() {
 
     // Keyboard shortcuts
     setupKeyboard();
+
+    // Settings modal
+    const settingsModal = document.getElementById('settings-modal');
+    const apiKeyInput = document.getElementById('freesound-api-key');
+    if (savedKey) apiKeyInput.value = savedKey;
+
+    document.getElementById('settings-btn').addEventListener('click', () => {
+        settingsModal.style.display = 'flex';
+    });
+    document.getElementById('close-settings').addEventListener('click', () => {
+        settingsModal.style.display = 'none';
+    });
+    window.addEventListener('click', (e) => {
+        if (e.target === settingsModal) settingsModal.style.display = 'none';
+    });
+    document.getElementById('save-settings').addEventListener('click', () => {
+        const key = apiKeyInput.value.trim();
+        if (key) {
+            localStorage.setItem('dm99-freesound-key', key);
+            showToast('API key saved ✓');
+        } else {
+            localStorage.removeItem('dm99-freesound-key');
+            showToast('API key removed');
+        }
+    });
+    document.getElementById('fetch-sounds-btn').addEventListener('click', fixMissingSamples);
 }
 
 document.addEventListener('DOMContentLoaded', init);

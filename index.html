@@ -49,6 +49,7 @@
             <button id="save-pattern" class="control-button">💾 Save</button>
             <button id="load-pattern" class="control-button">📂 Load</button>
             <button id="show-instructions" class="control-button">📖 Guide</button>
+            <button id="settings-btn" class="control-button">⚙️ Settings</button>
         </div>
 
         <!-- Slider Controls -->
@@ -135,6 +136,25 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div id="settings-modal">
+        <div id="settings-content">
+            <button id="close-settings">&times;</button>
+            <h2>⚙️ Settings</h2>
+            <div class="setting-row">
+                <label for="freesound-api-key">Freesound API Key</label>
+                <input type="text" id="freesound-api-key" placeholder="Enter your API key">
+                <small>Get one free at <a href="https://freesound.org/apiv2/apply/" target="_blank" style="color:var(--accent)">freesound.org/apiv2/apply</a></small>
+            </div>
+            <div class="setting-actions">
+                <button id="save-settings" class="control-button">💾 Save Key</button>
+                <button id="fetch-sounds-btn" class="control-button">🔍 Fetch Missing Samples</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tone.js Synth Engine -->
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.min.js"></script>
     <!-- NexusUI for pitch knobs -->
     <script src="https://cdn.jsdelivr.net/npm/nexusui@2.0.1/dist/NexusUI.min.js"></script>
     <script src="script.js"></script>
