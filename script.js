@@ -1,137 +1,84 @@
-// AudioContext Setup
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioContext();
+// ═══════════════════════════════════════════════════════════════════
+//  DM99 v2.0 — Config-Driven Drum Machine & Step Sequencer
+// ═══════════════════════════════════════════════════════════════════
 
-// Define which instruments should be mono
-const monoInstruments = [
-    'kick', 'bass1',
+// ============= INSTRUMENT CONFIGURATION =============
+const INSTRUMENTS = [
+    // --- Drums ---
+    { id: 'kick', label: 'Kick', group: 'Drums', volume: 0.8, mono: true,
+      url: 'https://cdn.freesound.org/previews/348/348054_6244580-lq.mp3',
+      adsr: { attack: 0.01, decay: 0.3, sustain: 0.0, release: 0.2 } },
+    { id: 'snare', label: 'Snare', group: 'Drums', volume: 0.7,
+      url: 'https://cdn.freesound.org/previews/25/25666_48671-lq.mp3' },
+    { id: 'clap', label: 'Clap', group: 'Drums', volume: 0.7,
+      url: 'https://cdn.freesound.org/previews/244/244568_165785-lq.mp3' },
+    { id: 'tom', label: 'Tom', group: 'Drums', volume: 0.7,
+      url: 'https://cdn.freesound.org/previews/443/443181_6979693-lq.mp3' },
+    { id: 'rimshot', label: 'Rim', group: 'Drums', volume: 0.65,
+      url: 'https://cdn.freesound.org/previews/250/250552_4486188-lq.mp3' },
+    { id: 'cowbell', label: 'Cow', group: 'Drums', volume: 0.55,
+      url: 'https://cdn.freesound.org/previews/351/351649_6295857-lq.mp3' },
+    // --- Cymbals ---
+    { id: 'hihatClosed', label: 'HHC', group: 'Cymbals', volume: 0.6,
+      url: 'https://cdn.freesound.org/previews/638/638654_433684-lq.mp3',
+      adsr: { attack: 0.005, decay: 0.15, sustain: 0.0, release: 0.1 } },
+    { id: 'hihatOpened', label: 'HHO', group: 'Cymbals', volume: 0.6,
+      url: 'https://cdn.freesound.org/previews/627/627344_13191763-lq.mp3' },
+    { id: 'crash', label: 'Crash', group: 'Cymbals', volume: 0.45,
+      url: 'https://cdn.freesound.org/previews/387/387186_7255534-lq.mp3' },
+    { id: 'ride', label: 'Ride', group: 'Cymbals', volume: 0.45,
+      url: 'https://cdn.freesound.org/previews/398/398228_2613581-lq.mp3' },
+    // --- Percussion ---
+    { id: 'perc1', label: 'Perc1', group: 'Perc', volume: 0.6,
+      url: 'https://cdn.freesound.org/previews/724/724509_11990934-lq.mp3' },
+    { id: 'perc2', label: 'Perc2', group: 'Perc', volume: 0.6,
+      url: 'https://cdn.freesound.org/previews/503/503788_9637845-lq.mp3' },
+    { id: 'perc3', label: 'Perc3', group: 'Perc', volume: 0.6,
+      url: 'https://cdn.freesound.org/previews/503/503779_9637845-lq.mp3' },
+    { id: 'perc4', label: 'Perc4', group: 'Perc', volume: 0.6,
+      url: 'https://cdn.freesound.org/previews/352/352280_1866366-lq.mp3' },
+    { id: 'perc5', label: 'Perc5', group: 'Perc', volume: 0.6,
+      url: 'https://cdn.freesound.org/previews/638/638557_12672694-lq.mp3' },
+    { id: 'perc6', label: 'Perc6', group: 'Perc', volume: 0.6,
+      url: 'https://cdn.freesound.org/previews/707/707194_6295857-lq.mp3' },
+    { id: 'shaker', label: 'Shak', group: 'Perc', volume: 0.5,
+      url: 'https://cdn.freesound.org/previews/446/446461_7037_lq.mp3' },
+    { id: 'tamb', label: 'Tamb', group: 'Perc', volume: 0.5,
+      url: 'https://cdn.freesound.org/previews/207/207920_19852-lq.mp3' },
+    // --- Tonal (sample-based, pitched) ---
+    { id: 'bass1', label: 'Bass', group: 'Tonal', volume: 0.5, mono: true, pitched: true,
+      url: 'https://cdn.freesound.org/previews/711/711469_15225418-lq.mp3',
+      adsr: { attack: 0.01, decay: 0.3, sustain: 0.7, release: 0.3 } },
+    { id: 'acid', label: 'Acid', group: 'Tonal', volume: 0.6, pitched: true,
+      url: 'https://cdn.freesound.org/previews/21/21998_45941-lq.mp3',
+      adsr: { attack: 0.01, decay: 0.2, sustain: 0.5, release: 0.2 } },
+    { id: 'synth', label: 'Synth', group: 'Tonal', volume: 0.6, pitched: true,
+      url: 'https://cdn.freesound.org/previews/315/315610_2050105-lq.mp3',
+      adsr: { attack: 0.05, decay: 0.3, sustain: 0.7, release: 0.5 } },
+    // --- Synth (oscillator-based, pitched) ---
+    { id: 'sub', label: 'Sub', group: 'Synth', volume: 0.6, pitched: true,
+      synth: { waveform: 'sine', baseFreq: 41.2 },
+      adsr: { attack: 0.01, decay: 0.5, sustain: 0.8, release: 0.3 } },
+    { id: 'tr808', label: '808', group: 'Synth', volume: 0.6, pitched: true,
+      synth: { waveform: 'triangle', baseFreq: 55, pitchDecay: true },
+      adsr: { attack: 0.001, decay: 0.8, sustain: 0.0, release: 0.1 } },
 ];
 
-// Sound URLs
-const sounds = {
-    kick: 'https://cdn.freesound.org/previews/348/348054_6244580-lq.mp3',
-    snare: 'https://cdn.freesound.org/previews/25/25666_48671-lq.mp3',
-    hihatClosed: 'https://cdn.freesound.org/previews/638/638654_433684-lq.mp3',
-    hihatOpened: 'https://cdn.freesound.org/previews/627/627344_13191763-lq.mp3',
-    clap: 'https://cdn.freesound.org/previews/244/244568_165785-lq.mp3',
-    bass1: 'https://cdn.freesound.org/previews/711/711469_15225418-lq.mp3',
-    tom: 'https://cdn.freesound.org/previews/443/443181_6979693-lq.mp3',
-    perc1: 'https://cdn.freesound.org/previews/724/724509_11990934-lq.mp3',
-    perc2: 'https://cdn.freesound.org/previews/503/503788_9637845-lq.mp3',
-    perc3: 'https://cdn.freesound.org/previews/503/503779_9637845-lq.mp3',
-    perc4: 'https://cdn.freesound.org/previews/352/352280_1866366-lq.mp3',
-    perc5: 'https://cdn.freesound.org/previews/638/638557_12672694-lq.mp3',
-    perc6: 'https://cdn.freesound.org/previews/707/707194_6295857-lq.mp3',
-    acid: 'https://cdn.freesound.org/previews/21/21998_45941-lq.mp3',
-    synth: 'https://cdn.freesound.org/previews/315/315610_2050105-lq.mp3', // New Synth Sample
+// Build lookup map
+const INSTRUMENT_MAP = {};
+INSTRUMENTS.forEach(inst => { INSTRUMENT_MAP[inst.id] = inst; });
+
+// ============= SCALES =============
+const SCALES = {
+    minor:    [0, 2, 3, 5, 7, 8, 10],
+    phrygian: [0, 1, 3, 5, 7, 8, 10],
 };
-const buffers = {};
+function getScalePitches(scale) { return SCALES[scale] || SCALES.minor; }
 
-// Preload Audio Buffers and Convert to Mono if needed
-async function loadSounds() {
-    const keys = Object.keys(sounds);
-    for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        const url = sounds[key];
-        try {
-            const response = await fetch(url);
-            const arrayBuffer = await response.arrayBuffer();
-            let audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+// ============= AUDIO ENGINE =============
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-            // Convert to mono if necessary
-            if (monoInstruments.includes(key)) {
-                const numChannels = audioBuffer.numberOfChannels;
-                const length = audioBuffer.length;
-                const sampleRate = audioBuffer.sampleRate;
-                const monoBuffer = audioCtx.createBuffer(1, length, sampleRate);
-                const monoData = monoBuffer.getChannelData(0);
-                // Average all channels
-                for (let sample = 0; sample < length; sample++) {
-                    let sum = 0;
-                    for (let channel = 0; channel < numChannels; channel++) {
-                        sum += audioBuffer.getChannelData(channel)[sample];
-                    }
-                    monoData[sample] = sum / numChannels;
-                }
-                buffers[key] = monoBuffer;
-            } else {
-                buffers[key] = audioBuffer;
-            }
-        } catch (error) {
-            console.error(`Error loading sound for ${key}:`, error);
-        }
-    }
-}
-
-// Variables
-let currentInstrument = 'kick';
-let isPlaying = false;
-let currentNote = 0;
-let tempo = 120;
-let swing = 0; // Swing percentage (0-100)
-let timerID;
-let swingOffset = 0;
-
-// Sequences
-const sequences = {
-    kick: new Array(32).fill(false),
-    snare: new Array(32).fill(false),
-    hihatClosed: new Array(32).fill(false),
-    hihatOpened: new Array(32).fill(false),
-    clap: new Array(32).fill(false),
-    bass1: new Array(32).fill(false).map(() => ({ active: false, pitch: 0 })),
-    tom: new Array(32).fill(false),
-    perc1: new Array(32).fill(false),
-    perc2: new Array(32).fill(false),
-    perc3: new Array(32).fill(false),
-    perc4: new Array(32).fill(false),
-    perc5: new Array(32).fill(false),
-    perc6: new Array(32).fill(false),
-    acid: new Array(32).fill(false),
-    synth: new Array(32).fill(false).map(() => ({ active: false, pitch: 0 })), // New Synth Sequence
-};
-
-// Mute and Solo States
-const mutedInstruments = {};
-const soloedInstruments = {};
-Object.keys(sequences).forEach(inst => {
-    mutedInstruments[inst] = false;
-    soloedInstruments[inst] = false;
-});
-
-// Instrument Volumes
-const instrumentVolumes = {
-    kick: 0.8,
-    snare: 0.7,
-    hihatClosed: 0.6,
-    hihatOpened: 0.6,
-    clap: 0.7,
-    bass1: 0.5,
-    tom: 0.7,
-    perc1: 0.6,
-    perc2: 0.6,
-    perc3: 0.6,
-    perc4: 0.6,
-    perc5: 0.6,
-    perc6: 0.6,
-    acid: 0.6,
-    synth: 0.6, // New Synth Volume
-};
-
-// ADSR Parameters
-const adsrParameters = {
-    kick: { attack: 0.1, decay: 0.3, sustain: 0.7, release: 0.5 },
-    hihatClosed: { attack: 0.05, decay: 0.2, sustain: 0.5, release: 0.3 },
-    hihatOpened: { attack: 0.05, decay: 0.2, sustain: 0.5, release: 0.3 },
-    bass1: { attack: 0.1, decay: 0.3, sustain: 0.7, release: 0.5 }, // New ADSR for Bass
-    synth: { attack: 0.1, decay: 0.3, sustain: 0.7, release: 0.5 }, // New ADSR for Synth
-};
-
-// Master Volume Setup
-const masterGain = audioCtx.createGain();
-masterGain.gain.value = 0.8; // Reduced to prevent clipping
-
-// Add a compressor to prevent clipping
+// Master compressor
 const masterCompressor = audioCtx.createDynamicsCompressor();
 masterCompressor.threshold.setValueAtTime(-24, audioCtx.currentTime);
 masterCompressor.knee.setValueAtTime(30, audioCtx.currentTime);
@@ -139,53 +86,37 @@ masterCompressor.ratio.setValueAtTime(12, audioCtx.currentTime);
 masterCompressor.attack.setValueAtTime(0, audioCtx.currentTime);
 masterCompressor.release.setValueAtTime(0.25, audioCtx.currentTime);
 
-// Master Low-Pass Filter
+// Master gain
+const masterGain = audioCtx.createGain();
+masterGain.gain.value = 0.8;
+
+// Master filters
 const masterLowpass = audioCtx.createBiquadFilter();
-masterLowpass.type = 'lowpass';
-masterLowpass.frequency.value = 20000; // Set initial frequency
-
-// Master High-Pass Filter
+masterLowpass.type = 'lowpass'; masterLowpass.frequency.value = 20000;
 const masterHighpass = audioCtx.createBiquadFilter();
-masterHighpass.type = 'highpass';
-masterHighpass.frequency.value = 20; // Set initial frequency
+masterHighpass.type = 'highpass'; masterHighpass.frequency.value = 20;
 
-// Equalizer Filters
+// Master EQ
 const eqFilters = {
-    low: audioCtx.createBiquadFilter(),
-    mid: audioCtx.createBiquadFilter(),
-    high: audioCtx.createBiquadFilter()
+    low:  Object.assign(audioCtx.createBiquadFilter(), { type: 'lowshelf' }),
+    mid:  Object.assign(audioCtx.createBiquadFilter(), { type: 'peaking' }),
+    high: Object.assign(audioCtx.createBiquadFilter(), { type: 'highshelf' }),
 };
-
-// Configure EQ Filters
-eqFilters.low.type = 'lowshelf';
 eqFilters.low.frequency.value = 320;
-
-eqFilters.mid.type = 'peaking';
-eqFilters.mid.frequency.value = 1000;
-eqFilters.mid.Q.value = 1;
-
-eqFilters.high.type = 'highshelf';
+eqFilters.mid.frequency.value = 1000; eqFilters.mid.Q.value = 1;
 eqFilters.high.frequency.value = 3200;
 
-// Bass EQ Filters
+// Bass/Synth EQ
 const bassEqFilters = {
-    low: audioCtx.createBiquadFilter(),
-    mid: audioCtx.createBiquadFilter(),
-    high: audioCtx.createBiquadFilter()
+    low:  Object.assign(audioCtx.createBiquadFilter(), { type: 'lowshelf' }),
+    mid:  Object.assign(audioCtx.createBiquadFilter(), { type: 'peaking' }),
+    high: Object.assign(audioCtx.createBiquadFilter(), { type: 'highshelf' }),
 };
-
-// Configure Bass EQ Filters
-bassEqFilters.low.type = 'lowshelf';
 bassEqFilters.low.frequency.value = 80;
-
-bassEqFilters.mid.type = 'peaking';
-bassEqFilters.mid.frequency.value = 500;
-bassEqFilters.mid.Q.value = 1;
-
-bassEqFilters.high.type = 'highshelf';
+bassEqFilters.mid.frequency.value = 500; bassEqFilters.mid.Q.value = 1;
 bassEqFilters.high.frequency.value = 2000;
 
-// Connect the audio nodes: Master Gain -> EQ Filters -> High-Pass Filter -> Low-Pass Filter -> Compressor -> Destination
+// Master chain: masterGain → EQ → HP → LP → Compressor → Destination
 masterGain.connect(eqFilters.low);
 eqFilters.low.connect(eqFilters.mid);
 eqFilters.mid.connect(eqFilters.high);
@@ -194,556 +125,658 @@ masterHighpass.connect(masterLowpass);
 masterLowpass.connect(masterCompressor);
 masterCompressor.connect(audioCtx.destination);
 
-// Create per-instrument gain nodes
+// Bass EQ chain connected ONCE: bassLow → bassMid → bassHigh → masterGain
+bassEqFilters.low.connect(bassEqFilters.mid);
+bassEqFilters.mid.connect(bassEqFilters.high);
+bassEqFilters.high.connect(masterGain);
+
+// Per-instrument gain nodes
 const instrumentGainNodes = {};
-Object.keys(instrumentVolumes).forEach(instrument => {
-    const gainNode = audioCtx.createGain();
-    gainNode.gain.value = instrumentVolumes[instrument];
-    if (instrument === 'bass1' || instrument === 'synth') {
-        // Connect Bass EQ Filters
-        gainNode.connect(bassEqFilters.low);
-        bassEqFilters.low.connect(bassEqFilters.mid);
-        bassEqFilters.mid.connect(bassEqFilters.high);
-        bassEqFilters.high.connect(masterGain);
-    } else {
-        gainNode.connect(masterGain);
-    }
-    instrumentGainNodes[instrument] = gainNode;
+INSTRUMENTS.forEach(inst => {
+    const gn = audioCtx.createGain();
+    gn.gain.value = inst.volume;
+    // Route pitched/synth instruments through bass EQ, others direct to master
+    gn.connect((inst.pitched || inst.synth) ? bassEqFilters.low : masterGain);
+    instrumentGainNodes[inst.id] = gn;
 });
 
-// Define scale pitches based on E0 sample to reach desired notes
-const minorScalePitches = [0, 2, 3, 5, 7, 8, 10]; // E natural minor: E, F#, G, A, B, C, D
-const phrygianScalePitches = [0, 1, 3, 5, 7, 8, 10]; // E Phrygian: E, F, G, A, B, C, D
+// ============= STATE =============
+let currentInstrument = 'kick';
+let isPlaying = false;
+let currentStep = 0;
+let previousStep = -1;
+let tempo = 120;
+let swing = 0;
+let swingOffset = 0;
+let timerID = null;
+let nextNoteTime = 0;
+let cachedPads = [];
+let activeKnobs = [];
 
-// Function to get scale pitches based on selected scale
-function getScalePitches(scale) {
-    if (scale === 'minor') {
-        return minorScalePitches;
-    } else if (scale === 'phrygian') {
-        return phrygianScalePitches;
-    } else {
-        return minorScalePitches; // Default to minor
-    }
-}
+// Sequences — normalized: every instrument uses { active, pitch, scale }
+const sequences = {};
+INSTRUMENTS.forEach(inst => {
+    sequences[inst.id] = Array.from({ length: 32 }, () => ({ active: false, pitch: 0, scale: 'minor' }));
+});
 
-// Initialize the application
-async function init() {
-    // Wait for DOM to be fully loaded
-    await loadSounds();
+// Mute / Solo / Volume / ADSR — derived from config
+const mutedInstruments = {};
+const soloedInstruments = {};
+const instrumentVolumes = {};
+const adsrParams = {};
+INSTRUMENTS.forEach(inst => {
+    mutedInstruments[inst.id] = false;
+    soloedInstruments[inst.id] = false;
+    instrumentVolumes[inst.id] = inst.volume;
+    if (inst.adsr) adsrParams[inst.id] = { ...inst.adsr };
+});
 
-    // DOM Elements
-    const instrumentButtons = document.querySelectorAll('.instrument-button');
-    const muteButtons = document.querySelectorAll('.mute-button');
-    const soloButtons = document.querySelectorAll('.solo-button');
-    const volumeSliders = document.querySelectorAll('.volume-slider');
-    const drumMachine = document.getElementById('drum-machine');
-    const playButton = document.getElementById('play');
-    const stopButton = document.getElementById('stop');
-    const randomBassButton = document.getElementById('random-bass');
-    const randomSynthButton = document.getElementById('random-synth');
-    const tempoSlider = document.getElementById('tempo');
-    const bpmDisplay = document.getElementById('bpm-display');
-    const swingSlider = document.getElementById('swing');
-    const swingDisplay = document.getElementById('swing-display');
-    const lowpassSlider = document.getElementById('lowpass-filter');
-    const lowpassDisplay = document.getElementById('lowpass-display');
-    const highpassSlider = document.getElementById('highpass-filter');
-    const highpassDisplay = document.getElementById('highpass-display');
-    const eqLowSlider = document.getElementById('eq-low');
-    const eqMidSlider = document.getElementById('eq-mid');
-    const eqHighSlider = document.getElementById('eq-high');
-    const eqLowDisplay = document.getElementById('eq-low-display');
-    const eqMidDisplay = document.getElementById('eq-mid-display');
-    const eqHighDisplay = document.getElementById('eq-high-display');
-    const bassEqLowSlider = document.getElementById('bass-eq-low');
-    const bassEqMidSlider = document.getElementById('bass-eq-mid');
-    const bassEqHighSlider = document.getElementById('bass-eq-high');
-    const bassEqLowDisplay = document.getElementById('bass-eq-low-display');
-    const bassEqMidDisplay = document.getElementById('bass-eq-mid-display');
-    const bassEqHighDisplay = document.getElementById('bass-eq-high-display');
-    const showInstructionsButton = document.getElementById('show-instructions');
-    const modal = document.getElementById('modal');
-    const closeModalButton = document.getElementById('close-modal');
-    const adsrToggle = document.getElementById('adsr-toggle');
-    const adsrContent = document.getElementById('adsr-content');
-    const masterVolumeSlider = document.getElementById('master-volume');
+// Audio buffers (for sample-based instruments)
+const buffers = {};
 
-    // Initialize swing and filter displays
-    swingDisplay.textContent = `${swing}%`;
-    lowpassDisplay.textContent = `${lowpassSlider.value} Hz`;
-    highpassDisplay.textContent = `${highpassSlider.value} Hz`;
-    eqLowDisplay.textContent = `${eqLowSlider.value} dB`;
-    eqMidDisplay.textContent = `${eqMidSlider.value} dB`;
-    eqHighDisplay.textContent = `${eqHighSlider.value} dB`;
-    bassEqLowDisplay.textContent = `${bassEqLowSlider.value} dB`;
-    bassEqMidDisplay.textContent = `${bassEqMidSlider.value} dB`;
-    bassEqHighDisplay.textContent = `${bassEqHighSlider.value} dB`;
+// ============= SOUND LOADING =============
+async function loadSounds() {
+    const sampleInstruments = INSTRUMENTS.filter(i => i.url);
+    let loaded = 0;
+    const total = sampleInstruments.length;
+    const progressEl = document.getElementById('loader-progress');
+    const textEl = document.getElementById('loader-text');
 
-    generatePads();
-    instrumentButtons[0].classList.add('active');
-    updatePads();
+    for (const inst of sampleInstruments) {
+        try {
+            textEl.textContent = `Loading ${inst.label}...`;
+            const response = await fetch(inst.url);
+            const arrayBuffer = await response.arrayBuffer();
+            let audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
 
-    bpmDisplay.textContent = tempo;
-    swingDisplay.textContent = `${swing}%`;
-    swingOffset = swing / 100 * (60 / tempo) / 2;
-    lowpassDisplay.textContent = `${lowpassSlider.value} Hz`;
-    highpassDisplay.textContent = `${highpassSlider.value} Hz`;
-    eqLowDisplay.textContent = `${eqLowSlider.value} dB`;
-    eqMidDisplay.textContent = `${eqMidSlider.value} dB`;
-    eqHighDisplay.textContent = `${eqHighSlider.value} dB`;
-    bassEqLowDisplay.textContent = `${bassEqLowSlider.value} dB`;
-    bassEqMidDisplay.textContent = `${bassEqMidSlider.value} dB`;
-    bassEqHighDisplay.textContent = `${bassEqHighSlider.value} dB`;
-    document.getElementById('current-year').textContent = new Date().getFullYear();
-
-    // Set initial filter frequencies based on slider values
-    masterLowpass.frequency.value = parseInt(lowpassSlider.value);
-    masterHighpass.frequency.value = parseInt(highpassSlider.value);
-
-    // Now, move all event listeners and functions that use DOM elements inside init()
-
-    // Instrument Button Events
-    instrumentButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            instrumentButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            currentInstrument = button.dataset.instrument;
-            generatePads();
-        });
-    });
-
-    // Mute Button Events
-    muteButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const instrument = button.dataset.instrument;
-            mutedInstruments[instrument] = !mutedInstruments[instrument];
-            button.classList.toggle('muted', mutedInstruments[instrument]);
-            updateGainNodes();
-        });
-    });
-
-    // Solo Button Events
-    soloButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const instrument = button.dataset.instrument;
-            soloedInstruments[instrument] = !soloedInstruments[instrument];
-            button.classList.toggle('active', soloedInstruments[instrument]);
-            updateGainNodes();
-        });
-    });
-
-    // Volume Slider Events
-    volumeSliders.forEach(slider => {
-        slider.addEventListener('input', () => {
-            const instrument = slider.dataset.instrument;
-            instrumentVolumes[instrument] = parseFloat(slider.value);
-            instrumentGainNodes[instrument].gain.value = instrumentVolumes[instrument];
-            updateGainNodes();
-        });
-    });
-
-    // Master Volume Control
-    masterVolumeSlider.addEventListener('input', () => {
-        masterGain.gain.value = parseFloat(masterVolumeSlider.value) * 0.8; // Adjust for initial 0.8
-    });
-
-    // ADSR Slider Events
-    const adsrSliders = document.querySelectorAll('.adsr-slider');
-    adsrSliders.forEach(slider => {
-        slider.addEventListener('input', () => {
-            const instrument = slider.dataset.instrument;
-            const param = slider.dataset.param;
-            if (adsrParameters[instrument]) {
-                adsrParameters[instrument][param] = parseFloat(slider.value);
+            // Convert to mono if needed
+            if (inst.mono && audioBuffer.numberOfChannels > 1) {
+                const len = audioBuffer.length;
+                const sr = audioBuffer.sampleRate;
+                const nc = audioBuffer.numberOfChannels;
+                const monoBuffer = audioCtx.createBuffer(1, len, sr);
+                const monoData = monoBuffer.getChannelData(0);
+                for (let s = 0; s < len; s++) {
+                    let sum = 0;
+                    for (let c = 0; c < nc; c++) sum += audioBuffer.getChannelData(c)[s];
+                    monoData[s] = sum / nc;
+                }
+                audioBuffer = monoBuffer;
             }
-        });
-    });
-
-    // Low-Pass Filter Slider Event
-    lowpassSlider.addEventListener('input', () => {
-        const freq = parseInt(lowpassSlider.value);
-        masterLowpass.frequency.value = freq;
-        lowpassDisplay.textContent = `${freq} Hz`;
-    });
-
-    // High-Pass Filter Slider Event
-    highpassSlider.addEventListener('input', () => {
-        const freq = parseInt(highpassSlider.value);
-        masterHighpass.frequency.value = freq;
-        highpassDisplay.textContent = `${freq} Hz`;
-    });
-
-    // Equalizer Slider Events
-    eqLowSlider.addEventListener('input', () => {
-        const gain = parseInt(eqLowSlider.value);
-        eqFilters.low.gain.value = gain;
-        eqLowDisplay.textContent = `${gain} dB`;
-    });
-
-    eqMidSlider.addEventListener('input', () => {
-        const gain = parseInt(eqMidSlider.value);
-        eqFilters.mid.gain.value = gain;
-        eqMidDisplay.textContent = `${gain} dB`;
-    });
-
-    eqHighSlider.addEventListener('input', () => {
-        const gain = parseInt(eqHighSlider.value);
-        eqFilters.high.gain.value = gain;
-        eqHighDisplay.textContent = `${gain} dB`;
-    });
-
-    // Bass EQ Slider Events
-    bassEqLowSlider.addEventListener('input', () => {
-        const gain = parseInt(bassEqLowSlider.value);
-        bassEqFilters.low.gain.value = gain;
-        bassEqLowDisplay.textContent = `${gain} dB`;
-    });
-
-    bassEqMidSlider.addEventListener('input', () => {
-        const gain = parseInt(bassEqMidSlider.value);
-        bassEqFilters.mid.gain.value = gain;
-        bassEqMidDisplay.textContent = `${gain} dB`;
-    });
-
-    bassEqHighSlider.addEventListener('input', () => {
-        const gain = parseInt(bassEqHighSlider.value);
-        bassEqFilters.high.gain.value = gain;
-        bassEqHighDisplay.textContent = `${gain} dB`;
-    });
-
-    // Swing Slider Event
-    swingSlider.addEventListener('input', () => {
-        swing = parseInt(swingSlider.value);
-        swingDisplay.textContent = `${swing}%`;
-        swingOffset = swing / 100 * (60 / tempo) / 2; // Calculate swing offset based on tempo
-    });
-
-    // Adjust Tempo
-    tempoSlider.addEventListener('input', () => {
-        tempo = parseInt(tempoSlider.value);
-        bpmDisplay.textContent = tempo;
-        // Recalculate swing offset based on new tempo
-        swingOffset = swing / 100 * (60 / tempo) / 2;
-    });
-
-    // Play/Stop Button Events
-    playButton.addEventListener('click', async () => {
-        if (audioCtx.state === 'suspended') {
-            await audioCtx.resume();
+            buffers[inst.id] = audioBuffer;
+        } catch (err) {
+            console.warn(`Failed to load ${inst.label}: ${err.message}`);
         }
-        startPlaying();
-    });
+        loaded++;
+        if (progressEl) progressEl.style.width = `${(loaded / total) * 100}%`;
+    }
+}
 
-    stopButton.addEventListener('click', () => {
-        stopPlaying();
-    });
+// ============= PLAY SOUND (sample-based, with cleanup) =============
+function playSound(buffer, time, playbackRate, duration, instrumentId, adsr) {
+    if (!buffer) return null;
+    const source = audioCtx.createBufferSource();
+    source.buffer = buffer;
+    source.playbackRate.value = playbackRate;
 
-    // Random Bass Line Generator
-    randomBassButton.addEventListener('click', () => {
-        generateRandomSequence('bass1');
-    });
+    const gainNode = audioCtx.createGain();
+    if (adsr) {
+        gainNode.gain.setValueAtTime(0, time);
+        gainNode.gain.linearRampToValueAtTime(1, time + adsr.attack);
+        gainNode.gain.linearRampToValueAtTime(adsr.sustain, time + adsr.attack + adsr.decay);
+        if (duration) {
+            gainNode.gain.setValueAtTime(adsr.sustain, time + duration);
+            gainNode.gain.linearRampToValueAtTime(0, time + duration + adsr.release);
+        }
+    } else {
+        gainNode.gain.setValueAtTime(1, time);
+    }
 
-    // Random Synth Line Generator
-    randomSynthButton.addEventListener('click', () => {
-        generateRandomSequence('synth');
-    });
+    source.connect(gainNode);
+    gainNode.connect(instrumentGainNodes[instrumentId]);
+    source.start(time);
+    if (duration) source.stop(time + duration + (adsr ? adsr.release : 0));
 
-    // ADSR Controls Toggle
-    adsrToggle.addEventListener('click', () => {
-        adsrContent.style.display = adsrContent.style.display === 'block' ? 'none' : 'block';
-        adsrToggle.textContent = adsrContent.style.display === 'block' ? 'ADSR Controls ▲' : 'ADSR Controls ▼';
-    });
+    // FIX: Clean up audio nodes to prevent memory leak
+    source.onended = () => { source.disconnect(); gainNode.disconnect(); };
+    return source;
+}
 
-    // Instructions Modal Events
-    showInstructionsButton.addEventListener('click', () => {
-        modal.style.display = 'flex';
-    });
+// ============= PLAY SYNTH NOTE (oscillator-based) =============
+function playSynthNote(instConfig, time, pitch) {
+    const sd = instConfig.synth;
+    const adsr = adsrParams[instConfig.id] || { attack: 0.01, decay: 0.3, sustain: 0.5, release: 0.2 };
+    const freq = Math.max(20, sd.baseFreq * Math.pow(2, (pitch - 12) / 12));
 
-    closeModalButton.addEventListener('click', () => {
-        modal.style.display = 'none';
-    });
+    const osc = audioCtx.createOscillator();
+    const envGain = audioCtx.createGain();
 
-    window.addEventListener('click', (e) => {
-        if (e.target == modal) {
-            modal.style.display = 'none';
+    osc.type = sd.waveform;
+    osc.frequency.setValueAtTime(freq, time);
+    if (sd.pitchDecay) {
+        osc.frequency.exponentialRampToValueAtTime(Math.max(freq * 0.2, 20), time + 0.4);
+    }
+
+    const a = adsr.attack, d = adsr.decay, s = adsr.sustain, r = adsr.release;
+    envGain.gain.setValueAtTime(0, time);
+    envGain.gain.linearRampToValueAtTime(1, time + a);
+    envGain.gain.linearRampToValueAtTime(Math.max(s, 0.001), time + a + d);
+    const holdEnd = time + a + d + 0.05;
+    envGain.gain.setValueAtTime(Math.max(s, 0.001), holdEnd);
+    envGain.gain.linearRampToValueAtTime(0.001, holdEnd + r);
+
+    osc.connect(envGain);
+    envGain.connect(instrumentGainNodes[instConfig.id]);
+
+    const stopTime = holdEnd + r + 0.05;
+    osc.start(time);
+    osc.stop(stopTime);
+    osc.onended = () => { osc.disconnect(); envGain.disconnect(); };
+}
+
+// ============= SCHEDULER =============
+function scheduler() {
+    while (nextNoteTime < audioCtx.currentTime + 0.1) {
+        scheduleNote(currentStep, nextNoteTime);
+        advanceStep();
+    }
+    timerID = setTimeout(scheduler, 25);
+}
+
+function advanceStep() {
+    const secondsPerBeat = 60.0 / tempo;
+    nextNoteTime += 0.25 * secondsPerBeat;
+    currentStep = (currentStep + 1) % 32;
+}
+
+function scheduleNote(step, time) {
+    // FIX: Only toggle previous and current pad (no DOM thrashing)
+    if (cachedPads.length > 0) {
+        if (previousStep >= 0 && previousStep < cachedPads.length)
+            cachedPads[previousStep].classList.remove('playing');
+        if (step < cachedPads.length)
+            cachedPads[step].classList.add('playing');
+        previousStep = step;
+    }
+
+    // Swing: offset odd steps
+    let adjustedTime = time;
+    if (step % 2 === 1) adjustedTime += swingOffset;
+
+    const isAnySoloed = Object.values(soloedInstruments).some(v => v);
+
+    INSTRUMENTS.forEach(inst => {
+        if (mutedInstruments[inst.id]) return;
+        if (isAnySoloed && !soloedInstruments[inst.id]) return;
+
+        const s = sequences[inst.id][step];
+        if (!s.active) return;
+
+        const adsr = adsrParams[inst.id] || null;
+
+        if (inst.synth) {
+            playSynthNote(inst, adjustedTime, s.pitch);
+        } else if (inst.pitched) {
+            const rate = Math.pow(2, (s.pitch - 12) / 12);
+            playSound(buffers[inst.id], adjustedTime, rate, null, inst.id, adsr);
+        } else {
+            playSound(buffers[inst.id], adjustedTime, 1, null, inst.id, adsr);
         }
     });
 }
 
-// Call init() after the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', () => {
-    init();
-});
+// ============= TRANSPORT =============
+async function startPlaying() {
+    if (isPlaying) return;
+    if (audioCtx.state === 'suspended') await audioCtx.resume();
+    isPlaying = true;
+    currentStep = 0;
+    previousStep = -1;
+    nextNoteTime = audioCtx.currentTime + 0.05;
+    scheduler();
+    document.getElementById('play').classList.add('active-play');
+}
 
-// Generate Pads
+function stopPlaying() {
+    if (!isPlaying) return;
+    isPlaying = false;
+    clearTimeout(timerID);
+    cachedPads.forEach(p => p.classList.remove('playing'));
+    previousStep = -1;
+    document.getElementById('play').classList.remove('active-play');
+}
+
+// ============= GAIN NODE UPDATES =============
+function updateGainNodes() {
+    const isAnySoloed = Object.values(soloedInstruments).some(v => v);
+    INSTRUMENTS.forEach(inst => {
+        const id = inst.id;
+        if (isAnySoloed) {
+            instrumentGainNodes[id].gain.value = soloedInstruments[id] ? instrumentVolumes[id] : 0;
+        } else {
+            instrumentGainNodes[id].gain.value = mutedInstruments[id] ? 0 : instrumentVolumes[id];
+        }
+    });
+}
+
+// ============= UI: GENERATE INSTRUMENT PANEL =============
+function generateInstrumentPanel() {
+    const panel = document.getElementById('instrument-panel');
+    panel.innerHTML = '';
+
+    // Group instruments
+    const groups = {};
+    INSTRUMENTS.forEach(inst => {
+        if (!groups[inst.group]) groups[inst.group] = [];
+        groups[inst.group].push(inst);
+    });
+
+    Object.entries(groups).forEach(([groupName, instruments]) => {
+        const label = document.createElement('div');
+        label.className = 'inst-group-label';
+        label.textContent = groupName;
+        panel.appendChild(label);
+
+        const row = document.createElement('div');
+        row.className = 'inst-group-row';
+
+        instruments.forEach(inst => {
+            const container = document.createElement('div');
+            container.className = 'instrument-container';
+
+            // Instrument select button
+            const btn = document.createElement('button');
+            btn.className = 'instrument-button';
+            btn.dataset.instrument = inst.id;
+            btn.textContent = inst.label;
+            if (inst.id === currentInstrument) btn.classList.add('active');
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.instrument-button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentInstrument = inst.id;
+                generatePads();
+            });
+
+            // Solo button
+            const solo = document.createElement('button');
+            solo.className = 'solo-button';
+            solo.textContent = '🔊';
+            solo.addEventListener('click', () => {
+                soloedInstruments[inst.id] = !soloedInstruments[inst.id];
+                solo.classList.toggle('active', soloedInstruments[inst.id]);
+                updateGainNodes();
+            });
+
+            // Volume slider
+            const vol = document.createElement('input');
+            vol.type = 'range'; vol.className = 'volume-slider';
+            vol.min = '0'; vol.max = '1'; vol.step = '0.01'; vol.value = inst.volume;
+            vol.addEventListener('input', () => {
+                instrumentVolumes[inst.id] = parseFloat(vol.value);
+                instrumentGainNodes[inst.id].gain.value = instrumentVolumes[inst.id];
+                updateGainNodes();
+            });
+
+            // Mute button
+            const mute = document.createElement('button');
+            mute.className = 'mute-button';
+            mute.textContent = '🔇';
+            mute.addEventListener('click', () => {
+                mutedInstruments[inst.id] = !mutedInstruments[inst.id];
+                mute.classList.toggle('muted', mutedInstruments[inst.id]);
+                updateGainNodes();
+            });
+
+            container.append(btn, solo, vol, mute);
+            row.appendChild(container);
+        });
+        panel.appendChild(row);
+    });
+}
+
+// ============= UI: GENERATE PADS =============
 function generatePads() {
-    const drumMachine = document.getElementById('drum-machine');
-    drumMachine.innerHTML = '';
-    for (let i = 0; i < 32; i++) { // 32 pads
+    // Destroy old NexusUI knobs
+    activeKnobs.forEach(k => { try { k.destroy(); } catch(e) {} });
+    activeKnobs = [];
+
+    const dm = document.getElementById('drum-machine');
+    dm.innerHTML = '';
+
+    const config = INSTRUMENT_MAP[currentInstrument];
+    const isPitched = !!config.pitched;
+
+    for (let i = 0; i < 32; i++) {
         const pad = document.createElement('div');
         pad.classList.add('pad');
         pad.dataset.step = i + 1;
         pad.dataset.index = i;
 
-        drumMachine.appendChild(pad);
+        const step = sequences[currentInstrument][i];
+        if (step.active) pad.classList.add('active');
 
-        if (currentInstrument === 'bass1' || currentInstrument === 'synth') {
-            // Create pitch knob
+        if (isPitched) {
             const knobContainer = document.createElement('div');
             knobContainer.classList.add('pitch-knob');
             pad.appendChild(knobContainer);
 
-            const step = sequences[currentInstrument][i];
-            const scalePitches = getScalePitches(step.scale || 'minor'); // Use the step's scale or default to 'minor'
-            const pitchIndex = scalePitches.indexOf(step.pitch);
-            const knob = new Nexus.Dial(knobContainer, {
-                size: [40, 40],
-                min: 0,
-                max: scalePitches.length - 1,
-                step: 1,
-                value: pitchIndex >= 0 ? pitchIndex : 0
-            });
+            const scalePitches = getScalePitches(step.scale || 'minor');
+            const pitchIndex = Math.max(0, scalePitches.indexOf(step.pitch));
 
-            knob.on('change', (v) => {
-                const index = Math.round(v);
-                sequences[currentInstrument][i].pitch = scalePitches[index];
-            });
-
-            knob.colorize("fill", "#00e676");
-            knob.colorize("accent", "#00e676");
+            // Defer Nexus.Dial creation
+            const idx = i;
+            setTimeout(() => {
+                try {
+                    const knob = new Nexus.Dial(knobContainer, {
+                        size: [34, 34], min: 0, max: scalePitches.length - 1,
+                        step: 1, value: pitchIndex
+                    });
+                    knob.on('change', v => {
+                        sequences[currentInstrument][idx].pitch = scalePitches[Math.round(v)];
+                    });
+                    knob.colorize('fill', '#00e676');
+                    knob.colorize('accent', '#00e676');
+                    activeKnobs.push(knob);
+                } catch(e) {}
+            }, 0);
 
             knobContainer.style.display = step.active ? 'block' : 'none';
 
-            pad.addEventListener('click', () => {
-                const step = sequences[currentInstrument][i];
+            pad.addEventListener('click', (e) => {
+                if (e.target.closest('.pitch-knob')) return; // Don't toggle when clicking knob
                 step.active = !step.active;
                 pad.classList.toggle('active', step.active);
                 knobContainer.style.display = step.active ? 'block' : 'none';
             });
         } else {
             pad.addEventListener('click', () => {
-                sequences[currentInstrument][i] = !sequences[currentInstrument][i];
-                pad.classList.toggle('active', sequences[currentInstrument][i]);
+                step.active = !step.active;
+                pad.classList.toggle('active', step.active);
             });
         }
+
+        dm.appendChild(pad);
     }
-    updatePads();
+
+    // Cache pad references for scheduler
+    cachedPads = Array.from(dm.querySelectorAll('.pad'));
 }
 
-// Update Pads
-function updatePads() {
-    const pads = document.querySelectorAll('.pad');
-    pads.forEach((pad, index) => {
-        if (currentInstrument === 'bass1' || currentInstrument === 'synth') {
-            pad.classList.toggle('active', sequences[currentInstrument][index].active);
-        } else {
-            pad.classList.toggle('active', sequences[currentInstrument][index]);
-        }
+// ============= UI: GENERATE ADSR CONTROLS =============
+function generateADSR() {
+    const content = document.getElementById('adsr-content');
+    content.innerHTML = '';
+
+    const adsrInstruments = INSTRUMENTS.filter(i => i.adsr);
+    adsrInstruments.forEach(inst => {
+        const div = document.createElement('div');
+        div.className = 'adsr-instrument';
+
+        const h4 = document.createElement('h4');
+        h4.textContent = inst.label;
+        div.appendChild(h4);
+
+        ['attack', 'decay', 'sustain', 'release'].forEach(param => {
+            const label = document.createElement('label');
+            label.textContent = param.charAt(0).toUpperCase() + param.slice(1);
+
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            slider.className = 'adsr-slider';
+            slider.min = '0';
+            slider.max = param === 'decay' || param === 'release' ? '2' : '1';
+            slider.step = '0.01';
+            slider.value = adsrParams[inst.id] ? adsrParams[inst.id][param] : 0.1;
+
+            slider.addEventListener('input', () => {
+                if (!adsrParams[inst.id]) adsrParams[inst.id] = { attack: 0.1, decay: 0.3, sustain: 0.7, release: 0.5 };
+                adsrParams[inst.id][param] = parseFloat(slider.value);
+            });
+
+            label.appendChild(slider);
+            div.appendChild(label);
+        });
+
+        content.appendChild(div);
     });
 }
 
-// Update Gain Nodes based on Mute and Solo States
-function updateGainNodes() {
-    const isAnySoloed = isAnySoloedFunction();
-    Object.keys(instrumentGainNodes).forEach(instrument => {
-        if (isAnySoloed) {
-            // If the instrument is soloed, set volume to its slider value
-            if (soloedInstruments[instrument]) {
-                instrumentGainNodes[instrument].gain.value = instrumentVolumes[instrument];
-            } else {
-                // Otherwise, set volume to 0
-                instrumentGainNodes[instrument].gain.value = 0;
-            }
-        } else {
-            // If no solos, set volume based on mute and slider
-            if (mutedInstruments[instrument]) {
-                instrumentGainNodes[instrument].gain.value = 0;
-            } else {
-                instrumentGainNodes[instrument].gain.value = instrumentVolumes[instrument];
-            }
-        }
-    });
-}
+// ============= RANDOM PATTERN GENERATOR =============
+const RHYTHM_PATTERNS = [
+    [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],
+    [1,0,1,0,0,1,0,0,1,0,1,0,0,1,0,0],
+    [0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0],
+    [1,0,0,1,0,0,0,1,0,0,1,0,0,0,1,0],
+    [1,1,0,1,1,0,1,1,0,1,1,0,1,1,0,1],
+    [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],
+    [1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1],
+    [1,0,1,0,1,0,0,1,0,1,0,1,0,1,0,0],
+];
 
-// Play Sound with ADSR Envelope
-function playSound(buffer, time, playbackRate = 1, duration = null, instrument = null, adsr = null) {
-    const source = audioCtx.createBufferSource();
-    source.buffer = buffer;
-    source.playbackRate.value = playbackRate;
-
-    const gainNode = audioCtx.createGain();
-
-    if (adsr) {
-        const now = time;
-        gainNode.gain.setValueAtTime(0, now);
-        gainNode.gain.linearRampToValueAtTime(1, now + adsr.attack);
-        gainNode.gain.linearRampToValueAtTime(adsr.sustain, now + adsr.attack + adsr.decay);
-        gainNode.gain.setValueAtTime(adsr.sustain, now + adsr.attack + adsr.decay);
-        if (duration) {
-            gainNode.gain.setValueAtTime(adsr.sustain, now + duration);
-            gainNode.gain.linearRampToValueAtTime(0, now + duration + adsr.release);
-        } else {
-            gainNode.gain.linearRampToValueAtTime(0, now + adsr.release);
-        }
-    }
-
-    source.connect(gainNode);
-    gainNode.connect(instrumentGainNodes[instrument]);
-    source.start(time);
-    if (duration) {
-        source.stop(time + duration + (adsr ? adsr.release : 0));
-    }
-    return source;
-}
-
-// Scheduler
-function scheduler() {
-    while (nextNoteTime < audioCtx.currentTime + 0.1) {
-        scheduleNote(currentNote, nextNoteTime);
-        nextNote();
-    }
-    timerID = setTimeout(scheduler, 25);
-}
-
-let nextNoteTime = 0.0;
-
-function nextNote() {
-    const secondsPerBeat = 60.0 / tempo;
-    nextNoteTime += 0.25 * secondsPerBeat;
-    currentNote = (currentNote + 1) % 32; // 32 steps
-}
-
-// Schedule Note with Swing
-function scheduleNote(beatNumber, time) {
-    // Highlight the pads
-    const pads = document.querySelectorAll('.pad');
-    pads.forEach((pad, index) => {
-        pad.classList.toggle('playing', index === beatNumber);
-    });
-
-    // Calculate swing offset for even beats
-    let adjustedTime = time;
-    if ((beatNumber % 2) === 1) { // Even step in 0-based index
-        adjustedTime += swingOffset;
-    }
-
-    // Play sounds
-    Object.keys(sequences).forEach(instrument => {
-        if (mutedInstruments[instrument] || (isAnySoloedFunction() && !soloedInstruments[instrument])) return;
-
-        if (instrument === 'bass1' || instrument === 'synth') {
-            const step = sequences[instrument][beatNumber];
-            if (step.active) {
-                const scalePitches = getScalePitches(step.scale || 'minor');
-                const pitch = Math.pow(2, (step.pitch - 12) / 12); // Adjusted to center around E0
-                let adsr = null;
-                if (adsrParameters[instrument]) {
-                    adsr = adsrParameters[instrument];
-                }
-                playSound(buffers[instrument], adjustedTime, pitch, null, instrument, adsr);
-            }
-        } else {
-            if (sequences[instrument][beatNumber]) {
-                let adsr = null;
-                if (adsrParameters[instrument]) {
-                    adsr = adsrParameters[instrument];
-                }
-                playSound(buffers[instrument], adjustedTime, 1, null, instrument, adsr);
-            }
-        }
-    });
-}
-
-// Check if any instrument is soloed
-function isAnySoloedFunction() {
-    return Object.values(soloedInstruments).some(val => val);
-}
-
-// Start Playing
-function startPlaying() {
-    if (!isPlaying) {
-        isPlaying = true;
-        currentNote = 0;
-        nextNoteTime = audioCtx.currentTime + 0.05;
-        scheduler();
-    }
-}
-
-// Stop Playing
-function stopPlaying() {
-    if (isPlaying) {
-        isPlaying = false;
-        clearTimeout(timerID);
-        const pads = document.querySelectorAll('.pad');
-        pads.forEach(pad => pad.classList.remove('playing'));
-    }
-}
-
-// Function to generate random sequence
-function generateRandomSequence(instrument) {
-    const rhythmicPatterns = [
-        // Pattern 1: Common 4-on-the-floor
-        [true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false],
-        // Pattern 2: Breakbeat style
-        [true, false, true, false, false, true, false, false, true, false, true, false, false, true, false, false],
-        // Pattern 3: Syncopated
-        [false, true, false, true, false, false, true, false, true, false, false, true, false, true, false, false],
-        // Pattern 4: Sparse
-        [true, false, false, true, false, false, false, true, false, false, true, false, false, false, true, false],
-        // Pattern 5: Dense
-        [true, true, false, true, true, false, true, true, false, true, true, false, true, true, false, true],
-        // Pattern 6: Off-beat
-        [false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true],
-        // Pattern 7: Triplet feel
-        [true, false, false, true, false, false, true, false, false, true, false, false, true, false, false, true],
-        // Pattern 8: Funky
-        [true, false, true, false, true, false, false, true, false, true, false, true, false, true, false, false],
-        // Pattern 9: Swing
-        [true, false, false, true, false, false, true, false, false, true, false, false, true, false, false, true],
-        // Pattern 10: Random hits
-        [true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false],
-    ];
-
-    // Randomly select a rhythmic pattern
-    const rhythm = rhythmicPatterns[Math.floor(Math.random() * rhythmicPatterns.length)];
-
-    // Randomly select a scale: 'minor' or 'phrygian'
+function generateRandomSequence(instrumentId) {
+    const inst = INSTRUMENT_MAP[instrumentId];
+    const rhythm = RHYTHM_PATTERNS[Math.floor(Math.random() * RHYTHM_PATTERNS.length)];
     const scales = ['minor', 'phrygian'];
     const selectedScale = scales[Math.floor(Math.random() * scales.length)];
     const scalePitches = getScalePitches(selectedScale);
 
-    const pattern = [];
-    for (let i = 0; i < rhythm.length; i++) {
-        if (rhythm[i]) {
-            let pitch;
-            if (i === 0 || i === rhythm.length - 1) {
-                // Start and end with root note (0)
-                pitch = 0;
-            } else {
-                pitch = scalePitches[Math.floor(Math.random() * scalePitches.length)];
+    const pattern = rhythm.map((hit, i) => ({
+        active: !!hit,
+        pitch: hit ? (i === 0 ? 0 : scalePitches[Math.floor(Math.random() * scalePitches.length)]) : 0,
+        scale: selectedScale
+    }));
+
+    // Repeat to fill 32 steps
+    sequences[instrumentId] = [...pattern, ...pattern];
+    if (currentInstrument === instrumentId) generatePads();
+}
+
+// ============= SAVE / LOAD =============
+function savePattern() {
+    const data = {
+        sequences, tempo, swing,
+        volumes: instrumentVolumes,
+        muted: mutedInstruments,
+        adsr: adsrParams,
+        version: 2
+    };
+    localStorage.setItem('dm99-pattern', JSON.stringify(data));
+    showToast('Pattern saved! 💾');
+}
+
+function loadPattern() {
+    const raw = localStorage.getItem('dm99-pattern');
+    if (!raw) { showToast('No saved pattern found'); return; }
+    try {
+        const data = JSON.parse(raw);
+        // Restore sequences
+        Object.keys(data.sequences).forEach(id => {
+            if (sequences[id]) sequences[id] = data.sequences[id];
+        });
+        // Restore volumes
+        if (data.volumes) Object.keys(data.volumes).forEach(id => {
+            if (instrumentVolumes[id] !== undefined) {
+                instrumentVolumes[id] = data.volumes[id];
+                instrumentGainNodes[id].gain.value = instrumentVolumes[id];
             }
-            pattern.push({
-                active: true,
-                pitch: pitch,
-                scale: selectedScale
-            });
-        } else {
-            // Rest
-            pattern.push({
-                active: false,
-                pitch: 0,
-                scale: selectedScale
-            });
+        });
+        // Restore tempo/swing
+        if (data.tempo) {
+            tempo = data.tempo;
+            document.getElementById('tempo').value = tempo;
+            document.getElementById('bpm-display').textContent = tempo;
         }
-    }
+        if (data.swing !== undefined) {
+            swing = data.swing;
+            document.getElementById('swing').value = swing;
+            document.getElementById('swing-display').textContent = `${swing}%`;
+            swingOffset = swing / 100 * (60 / tempo) / 2;
+        }
+        // Restore ADSR
+        if (data.adsr) Object.keys(data.adsr).forEach(id => {
+            if (adsrParams[id]) adsrParams[id] = data.adsr[id];
+        });
 
-    // Repeat the pattern to fill 32 steps
-    sequences[instrument] = [];
-    for (let i = 0; i < 2; i++) {
-        sequences[instrument] = sequences[instrument].concat(pattern);
-    }
-
-    if (currentInstrument === instrument) {
         generatePads();
+        generateInstrumentPanel(); // Refresh mute/solo/volume UI
+        showToast('Pattern loaded! 📂');
+    } catch(e) {
+        showToast('Error loading pattern');
+        console.error(e);
     }
 }
+
+// ============= TOAST =============
+let toastTimeout;
+function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('visible');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => el.classList.remove('visible'), 2000);
+}
+
+// ============= KEYBOARD SHORTCUTS =============
+function setupKeyboard() {
+    document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        switch (e.code) {
+            case 'Space':
+                e.preventDefault();
+                isPlaying ? stopPlaying() : startPlaying();
+                break;
+            case 'KeyS':
+                if (!e.ctrlKey && !e.metaKey) savePattern();
+                break;
+            case 'KeyL':
+                if (!e.ctrlKey && !e.metaKey) loadPattern();
+                break;
+            case 'KeyC':
+                if (!e.ctrlKey && !e.metaKey) {
+                    sequences[currentInstrument].forEach(s => { s.active = false; s.pitch = 0; });
+                    generatePads();
+                    showToast(`${INSTRUMENT_MAP[currentInstrument].label} cleared`);
+                }
+                break;
+        }
+    });
+}
+
+// ============= INITIALIZATION =============
+async function init() {
+    await loadSounds();
+
+    // Hide loading, show app
+    const loadingScreen = document.getElementById('loading-screen');
+    loadingScreen.classList.add('fade-out');
+    setTimeout(() => { loadingScreen.style.display = 'none'; }, 500);
+    document.getElementById('app').classList.remove('hidden');
+
+    // Generate dynamic UI
+    generateInstrumentPanel();
+    generatePads();
+    generateADSR();
+
+    // Footer year
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // --- Event Listeners ---
+
+    // Master volume
+    document.getElementById('master-volume').addEventListener('input', (e) => {
+        masterGain.gain.value = parseFloat(e.target.value) * 0.8;
+    });
+
+    // Tempo
+    document.getElementById('tempo').addEventListener('input', (e) => {
+        tempo = parseInt(e.target.value);
+        document.getElementById('bpm-display').textContent = tempo;
+        swingOffset = swing / 100 * (60 / tempo) / 2;
+    });
+
+    // Swing
+    document.getElementById('swing').addEventListener('input', (e) => {
+        swing = parseInt(e.target.value);
+        document.getElementById('swing-display').textContent = `${swing}%`;
+        swingOffset = swing / 100 * (60 / tempo) / 2;
+    });
+
+    // Filters
+    document.getElementById('lowpass-filter').addEventListener('input', (e) => {
+        const v = parseInt(e.target.value);
+        masterLowpass.frequency.value = v;
+        document.getElementById('lowpass-display').textContent = v >= 10000 ? `${(v/1000).toFixed(0)}k Hz` : `${v} Hz`;
+    });
+    document.getElementById('highpass-filter').addEventListener('input', (e) => {
+        const v = parseInt(e.target.value);
+        masterHighpass.frequency.value = v;
+        document.getElementById('highpass-display').textContent = `${v} Hz`;
+    });
+
+    // EQ sliders (master)
+    ['low', 'mid', 'high'].forEach(band => {
+        document.getElementById(`eq-${band}`).addEventListener('input', (e) => {
+            const g = parseInt(e.target.value);
+            eqFilters[band].gain.value = g;
+            document.getElementById(`eq-${band}-display`).textContent = `${g} dB`;
+        });
+    });
+
+    // EQ sliders (bass/synth)
+    ['low', 'mid', 'high'].forEach(band => {
+        document.getElementById(`bass-eq-${band}`).addEventListener('input', (e) => {
+            const g = parseInt(e.target.value);
+            bassEqFilters[band].gain.value = g;
+            document.getElementById(`bass-eq-${band}-display`).textContent = `${g} dB`;
+        });
+    });
+
+    // Transport
+    document.getElementById('play').addEventListener('click', startPlaying);
+    document.getElementById('stop').addEventListener('click', stopPlaying);
+
+    // Random (for current instrument — pitched get melodic, drums get rhythmic)
+    document.getElementById('random-pattern').addEventListener('click', () => {
+        const inst = INSTRUMENT_MAP[currentInstrument];
+        if (inst.pitched) {
+            generateRandomSequence(currentInstrument);
+        } else {
+            // Generate random drum pattern
+            const rhythm = RHYTHM_PATTERNS[Math.floor(Math.random() * RHYTHM_PATTERNS.length)];
+            const pattern = rhythm.map(h => ({ active: !!h, pitch: 0, scale: 'minor' }));
+            sequences[currentInstrument] = [...pattern, ...pattern];
+            generatePads();
+        }
+        showToast(`Random ${inst.label} pattern 🎲`);
+    });
+
+    // Clear
+    document.getElementById('clear-pattern').addEventListener('click', () => {
+        sequences[currentInstrument].forEach(s => { s.active = false; s.pitch = 0; });
+        generatePads();
+        showToast(`${INSTRUMENT_MAP[currentInstrument].label} cleared 🗑️`);
+    });
+
+    // Save / Load
+    document.getElementById('save-pattern').addEventListener('click', savePattern);
+    document.getElementById('load-pattern').addEventListener('click', loadPattern);
+
+    // ADSR toggle
+    const adsrContent = document.getElementById('adsr-content');
+    document.getElementById('adsr-toggle').addEventListener('click', () => {
+        const open = adsrContent.style.display === 'block';
+        adsrContent.style.display = open ? 'none' : 'block';
+        document.getElementById('adsr-toggle').textContent = open ? 'ADSR Controls ▼' : 'ADSR Controls ▲';
+    });
+
+    // Modal
+    const modal = document.getElementById('modal');
+    document.getElementById('show-instructions').addEventListener('click', () => { modal.style.display = 'flex'; });
+    document.getElementById('close-modal').addEventListener('click', () => { modal.style.display = 'none'; });
+    window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+
+    // Keyboard shortcuts
+    setupKeyboard();
+}
+
+document.addEventListener('DOMContentLoaded', init);

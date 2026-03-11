@@ -1,264 +1,111 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>DM99</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DM99 — Drum Machine</title>
+    <meta name="description" content="DM99 — Professional browser-based drum machine and step sequencer with 23 instruments, synth engine, EQ, filters, and ADSR controls.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap" rel="stylesheet">
-    <!-- Link to External CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Buy Me a Coffee Button -->
-    <a href="https://www.buymeacoffee.com/georgegeorge" class="buy-me-coffee" target="_blank" aria-label="Support us with a coffee 🍺">
-        🍺 Buy Me a Beer
-    </a>
-
-    <!-- Master Volume Slider at Top Right -->
-    <div id="master-volume-container">
-        <label for="master-volume">Master Volume:</label>
-        <input type="range" id="master-volume" min="0" max="1" step="0.01" value="1">
-    </div>
-
-    <div id="title">DM99</div>
-
-    <!-- Instrument Selector -->
-    <div class="instrument-selector">
-        <!-- Row 1 -->
-        <div class="instrument-container">
-            <button class="instrument-button" data-instrument="kick">Kick</button>
-            <button class="solo-button" data-instrument="kick">🔊</button>
-            <input type="range" class="volume-slider" data-instrument="kick" min="0" max="1" step="0.01" value="0.8">
-            <button class="mute-button" data-instrument="kick">🔇</button>
-        </div>
-        <div class="instrument-container">
-            <button class="instrument-button" data-instrument="snare">Snare</button>
-            <button class="solo-button" data-instrument="snare">🔊</button>
-            <input type="range" class="volume-slider" data-instrument="snare" min="0" max="1" step="0.01" value="0.7">
-            <button class="mute-button" data-instrument="snare">🔇</button>
-        </div>
-        <div class="instrument-container">
-            <button class="instrument-button" data-instrument="hihatClosed">HHC</button>
-            <button class="solo-button" data-instrument="hihatClosed">🔊</button>
-            <input type="range" class="volume-slider" data-instrument="hihatClosed" min="0" max="1" step="0.01" value="0.6">
-            <button class="mute-button" data-instrument="hihatClosed">🔇</button>
-        </div>
-        <div class="instrument-container">
-            <button class="instrument-button" data-instrument="hihatOpened">HHO</button>
-            <button class="solo-button" data-instrument="hihatOpened">🔊</button>
-            <input type="range" class="volume-slider" data-instrument="hihatOpened" min="0" max="1" step="0.01" value="0.6">
-            <button class="mute-button" data-instrument="hihatOpened">🔇</button>
-        </div>
-        <!-- Row 2 -->
-        <div class="instrument-container">
-            <button class="instrument-button" data-instrument="clap">Clap</button>
-            <button class="solo-button" data-instrument="clap">🔊</button>
-            <input type="range" class="volume-slider" data-instrument="clap" min="0" max="1" step="0.01" value="0.7">
-            <button class="mute-button" data-instrument="clap">🔇</button>
-        </div>
-        <div class="instrument-container">
-            <button class="instrument-button" data-instrument="tom">Tom</button>
-            <button class="solo-button" data-instrument="tom">🔊</button>
-            <input type="range" class="volume-slider" data-instrument="tom" min="0" max="1" step="0.01" value="0.7">
-            <button class="mute-button" data-instrument="tom">🔇</button>
-        </div>
-        <!-- Percussion Instruments -->
-        <div class="instrument-container">
-            <button class="instrument-button" data-instrument="perc1">Perc1</button>
-            <button class="solo-button" data-instrument="perc1">🔊</button>
-            <input type="range" class="volume-slider" data-instrument="perc1" min="0" max="1" step="0.01" value="0.6">
-            <button class="mute-button" data-instrument="perc1">🔇</button>
-        </div>
-        <div class="instrument-container">
-            <button class="instrument-button" data-instrument="perc2">Perc2</button>
-            <button class="solo-button" data-instrument="perc2">🔊</button>
-            <input type="range" class="volume-slider" data-instrument="perc2" min="0" max="1" step="0.01" value="0.6">
-            <button class="mute-button" data-instrument="perc2">🔇</button>
-        </div>
-        <div class="instrument-container">
-            <button class="instrument-button" data-instrument="perc3">Perc3</button>
-            <button class="solo-button" data-instrument="perc3">🔊</button>
-            <input type="range" class="volume-slider" data-instrument="perc3" min="0" max="1" step="0.01" value="0.6">
-            <button class="mute-button" data-instrument="perc3">🔇</button>
-        </div>
-        <div class="instrument-container">
-            <button class="instrument-button" data-instrument="perc4">Perc4</button>
-            <button class="solo-button" data-instrument="perc4">🔊</button>
-            <input type="range" class="volume-slider" data-instrument="perc4" min="0" max="1" step="0.01" value="0.6">
-            <button class="mute-button" data-instrument="perc4">🔇</button>
-        </div>
-        <div class="instrument-container">
-            <button class="instrument-button" data-instrument="perc5">Perc5</button>
-            <button class="solo-button" data-instrument="perc5">🔊</button>
-            <input type="range" class="volume-slider" data-instrument="perc5" min="0" max="1" step="0.01" value="0.6">
-            <button class="mute-button" data-instrument="perc5">🔇</button>
-        </div>
-        <div class="instrument-container">
-            <button class="instrument-button" data-instrument="perc6">Perc6</button>
-            <button class="solo-button" data-instrument="perc6">🔊</button>
-            <input type="range" class="volume-slider" data-instrument="perc6" min="0" max="1" step="0.01" value="0.6">
-            <button class="mute-button" data-instrument="perc6">🔇</button>
-        </div>
-        <!-- Bass Instrument -->
-        <div class="instrument-container">
-            <button class="instrument-button" data-instrument="bass1">Bass</button>
-            <button class="solo-button" data-instrument="bass1">🔊</button>
-            <input type="range" class="volume-slider" data-instrument="bass1" min="0" max="1" step="0.01" value="0.5">
-            <button class="mute-button" data-instrument="bass1">🔇</button>
-        </div>
-        <!-- Acid Instrument -->
-        <div class="instrument-container">
-            <button class="instrument-button" data-instrument="acid">Acid</button>
-            <button class="solo-button" data-instrument="acid">🔊</button>
-            <input type="range" class="volume-slider" data-instrument="acid" min="0" max="1" step="0.01" value="0.6">
-            <button class="mute-button" data-instrument="acid">🔇</button>
-        </div>
-        <!-- Synth Instrument -->
-        <div class="instrument-container">
-            <button class="instrument-button" data-instrument="synth">Synth</button>
-            <button class="solo-button" data-instrument="synth">🔊</button>
-            <input type="range" class="volume-slider" data-instrument="synth" min="0" max="1" step="0.01" value="0.6">
-            <button class="mute-button" data-instrument="synth">🔇</button>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loader-content">
+            <div class="loader-title">DM99</div>
+            <div class="loader-bar"><div id="loader-progress" class="loader-progress"></div></div>
+            <div id="loader-text" class="loader-text">Initializing audio engine...</div>
         </div>
     </div>
 
-    <!-- Drum Machine Pads -->
-    <div id="drum-machine">
-        <!-- Pads will be generated dynamically -->
-    </div>
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
 
-    <!-- Controls -->
-    <div id="controls">
-        <button id="play" class="control-button">▶️ Play</button>
-        <button id="stop" class="control-button">⏹️ Stop</button>
-        <button id="random-bass" class="control-button">🎲 Random Bass Line</button>
-        <button id="random-synth" class="control-button">🎲 Random Synth Line</button>
-        <button id="show-instructions" class="control-button">📖 User Guide</button>
-    </div>
-
-    <!-- Slider Controls -->
-    <div id="slider-controls">
-        <div id="tempo-container">
-            <label for="tempo">Tempo:</label>
-            <input type="range" id="tempo" min="60" max="200" value="120">
-            <div id="bpm-display">120</div>
-        </div>
-
-        <div id="swing-container">
-            <label for="swing">Swing:</label>
-            <input type="range" id="swing" min="0" max="100" value="0">
-            <div id="swing-display">0%</div>
-        </div>
-
-        <!-- Equalizer Controls -->
-        <div id="equalizer-controls">
-            <label for="eq-low">Low:</label>
-            <input type="range" id="eq-low" min="-30" max="30" step="1" value="0">
-            <span id="eq-low-display">0 dB</span>
-            <label for="eq-mid">Mid:</label>
-            <input type="range" id="eq-mid" min="-30" max="30" step="1" value="0">
-            <span id="eq-mid-display">0 dB</span>
-            <label for="eq-high">High:</label>
-            <input type="range" id="eq-high" min="-30" max="30" step="1" value="0">
-            <span id="eq-high-display">0 dB</span>
-        </div>
-        <div id="lowpass-filter-container">
-            <label for="lowpass-filter">Low-Pass Filter:</label>
-            <input type="range" id="lowpass-filter" min="200" max="20000" step="100" value="20000">
-            <div id="lowpass-display">20000 Hz</div>
-        </div>
-
-        <div id="highpass-filter-container">
-            <label for="highpass-filter">High-Pass Filter:</label>
-            <input type="range" id="highpass-filter" min="20" max="2000" step="100" value="20">
-            <div id="highpass-display">20 Hz</div>
-        </div>
-
-        <!-- Bass EQ Controls -->
-        <div id="bass-eq-controls">
-            <h3>Synth/Bass EQ</h3>
-            <label for="bass-eq-low">Low:</label>
-            <input type="range" id="bass-eq-low" min="-30" max="30" step="1" value="0">
-            <span id="bass-eq-low-display">0 dB</span>
-            <label for="bass-eq-mid">Mid:</label>
-            <input type="range" id="bass-eq-mid" min="-30" max="30" step="1" value="0">
-            <span id="bass-eq-mid-display">0 dB</span>
-            <label for="bass-eq-high">High:</label>
-            <input type="range" id="bass-eq-high" min="-30" max="30" step="1" value="0">
-            <span id="bass-eq-high-display">0 dB</span>
-        </div>
-    </div>
-
-    <!-- ADSR Controls (Collapsible) -->
-    <div id="adsr-controls">
-        <h3 id="adsr-toggle">ADSR Controls ▼</h3>
-        <div id="adsr-content">
-            <!-- ADSR Controls for Kick -->
-            <div class="adsr-instrument">
-                <h4>Kick</h4>
-                <label>Attack:
-                    <input type="range" class="adsr-slider" data-instrument="kick" data-param="attack" min="0" max="1" step="0.01" value="0.1">
-                </label>
-                <label>Decay:
-                    <input type="range" class="adsr-slider" data-instrument="kick" data-param="decay" min="0" max="2" step="0.01" value="0.3">
-                </label>
-                <label>Sustain:
-                    <input type="range" class="adsr-slider" data-instrument="kick" data-param="sustain" min="0" max="1" step="0.01" value="0.7">
-                </label>
-                <label>Release:
-                    <input type="range" class="adsr-slider" data-instrument="kick" data-param="release" min="0" max="2" step="0.01" value="0.5">
-                </label>
+    <!-- Main App (hidden until loaded) -->
+    <div id="app" class="hidden">
+        <!-- Header -->
+        <header id="header">
+            <div id="title">DM99</div>
+            <div id="master-volume-container">
+                <label for="master-volume">🔊 Master</label>
+                <input type="range" id="master-volume" min="0" max="1" step="0.01" value="1">
             </div>
-            <!-- ADSR Controls for Hi-Hat Closed -->
-            <div class="adsr-instrument">
-                <h4>Hi-Hat Closed</h4>
-                <label>Attack:
-                    <input type="range" class="adsr-slider" data-instrument="hihatClosed" data-param="attack" min="0" max="1" step="0.01" value="0.05">
-                </label>
-                <label>Decay:
-                    <input type="range" class="adsr-slider" data-instrument="hihatClosed" data-param="decay" min="0" max="2" step="0.01" value="0.2">
-                </label>
-                <label>Sustain:
-                    <input type="range" class="adsr-slider" data-instrument="hihatClosed" data-param="sustain" min="0" max="1" step="0.01" value="0.5">
-                </label>
-                <label>Release:
-                    <input type="range" class="adsr-slider" data-instrument="hihatClosed" data-param="release" min="0" max="2" step="0.01" value="0.3">
-                </label>
+        </header>
+
+        <!-- Instrument Selector (generated dynamically by JS) -->
+        <div id="instrument-panel" class="panel"></div>
+
+        <!-- Drum Machine Pads -->
+        <div id="drum-machine"></div>
+
+        <!-- Transport Controls -->
+        <div id="controls">
+            <button id="play" class="control-button">▶️ Play</button>
+            <button id="stop" class="control-button">⏹️ Stop</button>
+            <button id="random-pattern" class="control-button">🎲 Random</button>
+            <button id="clear-pattern" class="control-button">🗑️ Clear</button>
+            <button id="save-pattern" class="control-button">💾 Save</button>
+            <button id="load-pattern" class="control-button">📂 Load</button>
+            <button id="show-instructions" class="control-button">📖 Guide</button>
+        </div>
+
+        <!-- Slider Controls -->
+        <div id="slider-controls" class="panel">
+            <div class="control-group">
+                <label for="tempo">Tempo</label>
+                <input type="range" id="tempo" min="60" max="200" value="120">
+                <span id="bpm-display" class="val-display">120</span>
             </div>
-            <!-- ADSR Controls for Bass -->
-            <div class="adsr-instrument">
-                <h4>Bass</h4>
-                <label>Attack:
-                    <input type="range" class="adsr-slider" data-instrument="bass1" data-param="attack" min="0" max="1" step="0.01" value="0.1">
-                </label>
-                <label>Decay:
-                    <input type="range" class="adsr-slider" data-instrument="bass1" data-param="decay" min="0" max="2" step="0.01" value="0.3">
-                </label>
-                <label>Sustain:
-                    <input type="range" class="adsr-slider" data-instrument="bass1" data-param="sustain" min="0" max="1" step="0.01" value="0.7">
-                </label>
-                <label>Release:
-                    <input type="range" class="adsr-slider" data-instrument="bass1" data-param="release" min="0" max="2" step="0.01" value="0.5">
-                </label>
+            <div class="control-group">
+                <label for="swing">Swing</label>
+                <input type="range" id="swing" min="0" max="100" value="0">
+                <span id="swing-display" class="val-display">0%</span>
             </div>
-            <!-- ADSR Controls for Synth -->
-            <div class="adsr-instrument">
-                <h4>Synth</h4>
-                <label>Attack:
-                    <input type="range" class="adsr-slider" data-instrument="synth" data-param="attack" min="0" max="1" step="0.01" value="0.1">
-                </label>
-                <label>Decay:
-                    <input type="range" class="adsr-slider" data-instrument="synth" data-param="decay" min="0" max="2" step="0.01" value="0.3">
-                </label>
-                <label>Sustain:
-                    <input type="range" class="adsr-slider" data-instrument="synth" data-param="sustain" min="0" max="1" step="0.01" value="0.7">
-                </label>
-                <label>Release:
-                    <input type="range" class="adsr-slider" data-instrument="synth" data-param="release" min="0" max="2" step="0.01" value="0.5">
-                </label>
+            <div class="control-group">
+                <label for="lowpass-filter">LP Filter</label>
+                <input type="range" id="lowpass-filter" min="200" max="20000" step="100" value="20000">
+                <span id="lowpass-display" class="val-display">20k Hz</span>
+            </div>
+            <div class="control-group">
+                <label for="highpass-filter">HP Filter</label>
+                <input type="range" id="highpass-filter" min="20" max="2000" step="10" value="20">
+                <span id="highpass-display" class="val-display">20 Hz</span>
             </div>
         </div>
+
+        <!-- EQ Controls -->
+        <div id="eq-panel" class="panel">
+            <div class="eq-section">
+                <h3>Master EQ</h3>
+                <div class="eq-controls">
+                    <div class="control-group"><label for="eq-low">Low</label><input type="range" id="eq-low" min="-30" max="30" step="1" value="0"><span id="eq-low-display" class="val-display">0 dB</span></div>
+                    <div class="control-group"><label for="eq-mid">Mid</label><input type="range" id="eq-mid" min="-30" max="30" step="1" value="0"><span id="eq-mid-display" class="val-display">0 dB</span></div>
+                    <div class="control-group"><label for="eq-high">High</label><input type="range" id="eq-high" min="-30" max="30" step="1" value="0"><span id="eq-high-display" class="val-display">0 dB</span></div>
+                </div>
+            </div>
+            <div class="eq-section">
+                <h3>Synth / Bass EQ</h3>
+                <div class="eq-controls">
+                    <div class="control-group"><label for="bass-eq-low">Low</label><input type="range" id="bass-eq-low" min="-30" max="30" step="1" value="0"><span id="bass-eq-low-display" class="val-display">0 dB</span></div>
+                    <div class="control-group"><label for="bass-eq-mid">Mid</label><input type="range" id="bass-eq-mid" min="-30" max="30" step="1" value="0"><span id="bass-eq-mid-display" class="val-display">0 dB</span></div>
+                    <div class="control-group"><label for="bass-eq-high">High</label><input type="range" id="bass-eq-high" min="-30" max="30" step="1" value="0"><span id="bass-eq-high-display" class="val-display">0 dB</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADSR Controls (content generated dynamically by JS) -->
+        <div id="adsr-controls" class="panel">
+            <h3 id="adsr-toggle">ADSR Controls ▼</h3>
+            <div id="adsr-content"></div>
+        </div>
+
+        <!-- Buy Me a Coffee -->
+        <a href="https://www.buymeacoffee.com/georgegeorge" class="buy-me-coffee" target="_blank" aria-label="Support us with a beer">🍺 Buy Me a Beer</a>
+
+        <!-- Footer -->
+        <footer>DM99 v2.0 | J.Gazca &copy; <span id="current-year"></span> | <kbd>Space</kbd> Play · <kbd>S</kbd> Save · <kbd>L</kbd> Load</footer>
     </div>
 
     <!-- Instructions Modal -->
@@ -267,32 +114,29 @@
             <button id="close-modal">&times;</button>
             <h2>User Guide 📖</h2>
             <ul>
-                <li>Select an instrument by clicking its name.</li>
-                <li>Click on the pads to activate or deactivate steps for that instrument.</li>
-                <li>For Bass and Synth, adjust the pitch of each step using the knob that appears on active pads.</li>
-                <li>Use the mute button (🔇), solo button (🔊), and the volume sliders next to each instrument to control sound levels.</li>
-                <li>Adjust the tempo using the slider under 'Tempo'.</li>
-                <li>Adjust the swing using the slider under 'Swing'.</li>
-                <li>Adjust the master volume using the 'Master Volume' slider at the top right.</li>
-                <li>Adjust the Low-Pass Filter cutoff frequency using the 'Low-Pass Filter' slider.</li>
-                <li>Adjust the High-Pass Filter cutoff frequency using the 'High-Pass Filter' slider.</li>
-                <li>Use the Equalizer controls to adjust Low, Mid, and High frequencies.</li>
-                <li>Use the Bass EQ controls to adjust the Bass and Synth instruments' Low, Mid, and High frequencies.</li>
-                <li>Use the ADSR controls to shape the sound of the Kick, Hi-Hat, Bass, and Synth. Click on 'ADSR Controls ▼' to expand or collapse the menu.</li>
-                <li>Click 'Play' ▶️ to start the sequence and 'Stop' ⏹️ to stop it.</li>
-                <li>You can use 'Random Bass Line' 🎲 and 'Random Synth Line' 🎲 to generate random sequences.</li>
+                <li>Select an instrument by clicking its name in the instrument panel.</li>
+                <li>Click on pads to activate/deactivate steps for that instrument.</li>
+                <li>For pitched instruments (Bass, Acid, Synth, Sub, 808), use the knob on active pads to change pitch.</li>
+                <li>Use 🔇 mute, 🔊 solo, and volume sliders to mix instruments.</li>
+                <li>Adjust Tempo, Swing, Low-Pass and High-Pass filters with the sliders.</li>
+                <li>Use the Master EQ and Synth/Bass EQ to shape the overall sound.</li>
+                <li>Expand ADSR Controls to shape attack, decay, sustain, and release per instrument.</li>
+                <li>Click ▶️ Play to start and ⏹️ Stop to stop the sequence.</li>
+                <li>🎲 Random generates a random pattern for the selected instrument (pitched instruments get melodic lines).</li>
+                <li>💾 Save / 📂 Load persist your pattern in the browser.</li>
+            </ul>
+            <h3>Keyboard Shortcuts</h3>
+            <ul>
+                <li><kbd>Space</kbd> — Play / Stop</li>
+                <li><kbd>S</kbd> — Save pattern</li>
+                <li><kbd>L</kbd> — Load pattern</li>
+                <li><kbd>C</kbd> — Clear current instrument</li>
             </ul>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer>
-        DM99 Beta v1.0 | J.Gazca &copy; <span id="current-year"></span>
-    </footer>
-
-    <!-- Include NexusUI Library for Knob Control -->
+    <!-- NexusUI for pitch knobs -->
     <script src="https://cdn.jsdelivr.net/npm/nexusui@2.0.1/dist/NexusUI.min.js"></script>
-    <!-- Link to External JavaScript -->
     <script src="script.js"></script>
 </body>
 </html>
