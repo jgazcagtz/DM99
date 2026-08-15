@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">DM99</title>
+  <rect width="512" height="512" rx="112" fill="#08090d"/>
+  <path d="M75 96h167c80 0 133 48 133 127 0 35-11 64-32 86h94v107H292v-76c-17 7-35 10-56 10h-42v66H75V96zm119 101v53h38c20 0 32-9 32-27 0-17-12-26-32-26h-38z" fill="#c9ff39"/>
+  <circle cx="406" cy="116" r="31" fill="#ff5d4a"/>
+</svg>

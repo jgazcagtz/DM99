@@ -1,262 +1,186 @@
-# DM99 AI
+# DM99 v3 — Local AI Groovebox
 
-DM99 AI is a browser-based drum machine and 32-step electronic-music sequencer. It combines a Web Audio playback and mixing engine, sample-backed and synthesized instruments, deterministic genre pattern generation, and an optional browser-side Magenta fallback.
+DM99 is a free, installable electronic-music machine that runs in the browser. It combines a 26-track groovebox, 32-step expressive sequencer, procedural sound library, local composition assistant, sampler, mixer, project library, MIDI tools, and real WAV mixdown.
 
-The “AI” label describes the pattern-assistant workflow. The primary server generator is intentionally deterministic and rule-based; it does not currently call a hosted machine-learning model.
+The performance path is intentionally local: no account, database, paid model, API key, sample CDN, or hosted AI call is required. Once the app shell has been opened and cached, it can make music offline.
 
-## Features
+## What is included
 
-- 32-step sequencer with per-step activation and pitch controls for tonal instruments.
-- 26 instruments: 21 sample-backed instrument slots and five Tone.js synthesizers.
-- Techno, house, trance, and drum & bass pattern generation.
-- Energy control from `0.0` to `1.0`; server patterns add density in deterministic tiers.
-- Genre- and energy-aware bass generation in the browser.
-- Optional Magenta MusicRNN drum continuation if the server request fails.
-- Synchronous local rule generator if both the server and Magenta are unavailable.
-- Procedural Web Audio buffers when a remote sample cannot be fetched or decoded.
-- Tempo, swing, master low-pass/high-pass filters, compression, master EQ, and synth/bass EQ.
-- Per-instrument volume, mute, solo, and supported ADSR controls.
-- Browser-local pattern save/load and keyboard shortcuts.
-- Responsive controls for desktop and smaller screens.
+- **26 guaranteed voices:** drums, cymbals, percussion, basses, leads, plucks, pads, and synthesis voices.
+- **124 built-in sounds:** 84 procedural sample-style presets plus 40 native synth presets.
+- **Eight kits:** Techno, Deep House, Electro, Trance, DnB, Industrial, Acid, and Ambient.
+- **Expressive 32-step sequencing:** velocity, probability, ratchets, timing nudge, accent, pitch, scale, and slide.
+- **Eight pattern slots:** A–H variations live inside every project.
+- **Pattern Lab:** seeded genre composition, three instant candidates, lane locks, natural-language control hints, and editable transformations.
+- **26-channel mixer:** per-lane sound selection, volume, pan, mute, and solo, plus master filtering, three-band EQ, drive/compression, delay, and space.
+- **Local project library:** IndexedDB storage, autosave, named projects, browsable/restorable revision history, undo/redo, and migration from the older `dm99-pattern` save.
+- **Sampler:** import or record audio, browse the on-device sample library, inspect waveforms, crop, normalize, reverse, tune, loop/gate, assign choke groups, or slice across four lanes.
+- **Import/export:** versioned project JSON, Standard MIDI Files, shareable compressed pattern links, and non-silent stereo WAV mixdowns.
+- **Performance input:** computer-keyboard pads and optional Web MIDI capture.
+- **Installable PWA:** responsive desktop/mobile UI and an offline application shell.
 
-## Instruments and audio sources
+## What “AI” means here
 
-| Group | Count | Instruments | Playback source |
-| --- | ---: | --- | --- |
-| Drums | 6 | Kick, Snare, Clap, Tom, Rim, Cow | Procedural Web Audio buffer |
-| Cymbals | 4 | Closed hat, Open hat, Crash, Ride | Procedural Web Audio buffer |
-| Percussion | 8 | Perc1–Perc6, Shaker, Tambourine | Procedural Web Audio buffer |
-| Tonal | 3 | Bass, Acid, Synth | Pitched procedural Web Audio buffer |
-| Synth | 5 | Sub, 808, FM, Pluck, AM | Tone.js synthesis |
+DM99 v3 uses **local symbolic composition intelligence**, not an LLM and not text-to-audio generation. Pattern Lab combines:
 
-The 21 sample-backed slots have deterministic procedural buffers by default, so startup and playback do not depend on a third-party sample host. The 14 requested SampleSwap paths remain recorded in the instrument manifest for diagnostics, but remote loading is disabled because those paths are not currently browser-loadable.
+- curated genre foundations;
+- deterministic seeded variation;
+- energy, complexity, syncopation, and humanization controls;
+- lightweight phrase parsing such as “dark techno, busy hats, less kick”;
+- tonal accompaniment derived from the drum structure;
+- lane locks and musical transformations.
 
-Appending `?remoteSamples=1` opts into a best-effort diagnostic mode. In that mode the loader:
+Every result is immediate, reproducible from its seed, and remains fully editable. This avoids model downloads, network round trips, server cold starts, usage quotas, unpredictable model output, and provider costs.
 
-1. Fetches each distinct URL with a five-second timeout.
-2. Retries a transient network or server failure once.
-3. Verifies that the response has an audio-compatible content type.
-4. Decodes the response with Web Audio.
-5. Creates a deterministic procedural buffer for each affected instrument if any step fails.
+The optional `/api/generate-pattern` function uses the same bounded rule engine for external consumers. The browser’s core Pattern Lab does not wait for it.
 
-The requested SampleSwap paths may return missing or non-audio responses, reject cross-origin browser requests, or change their access policy. Diagnostic mode is not recommended for normal or production use. When a remote request fails, the loading screen reports how many built-in fallbacks are active and playback continues.
+## Sound system
 
-### Sample and project licensing
+All built-in sound comes from native Web Audio synthesis and deterministic DSP. DM99 does not fetch SampleSwap, Freesound, Tone.js, Magenta, Google Fonts, or any other runtime CDN.
 
-This repository does **not** guarantee that configured third-party samples are royalty-free, redistributable, hotlinkable, or cleared for commercial use. Verify each source file’s current license, provenance, attribution requirements, and hotlink policy before enabling or using remote samples. The default procedural audio is generated locally by the application and does not copy the remote files.
+| Family | Tracks |
+| --- | --- |
+| Drums | Kick, Snare, Clap, Tom, Rim, Cow |
+| Cymbals | HHC, HHO, Crash, Ride |
+| Percussion | Perc1–Perc6, Shak, Tamb |
+| Tonal | Bass, Acid, Synth |
+| Synth | Sub, 808, FM, Pluck, AM |
 
-There is currently no project-level `LICENSE` file in this repository. Do not assume the application code is MIT-licensed until the repository owner adds an explicit license.
+Every track has a valid procedural preset in every kit. User-imported audio is an optional override; removing it leaves the built-in voice available.
 
-## Pattern-generation flow
+## Quick start
 
-When **Generate drums** is selected, the client follows this order:
-
-```mermaid
-flowchart LR
-    A["Generate drums"] --> B["POST /api/generate-pattern"]
-    B -->|"valid response"| C["Apply server rule pattern"]
-    B -->|"HTTP, timeout, or malformed response"| D["Magenta MusicRNN continuation"]
-    D -->|"model result"| E["Apply browser model pattern"]
-    D -->|"CDN, checkpoint, init, or inference failure"| F["Apply local rule pattern"]
-```
-
-The UI reports which source actually produced the pattern. Magenta is a fallback, not the primary generator. On its first use it must initialize the `drum_kit_rnn` checkpoint, which is roughly a 14 MB model download and can be slow or unavailable on restricted networks. Genre affects the rule-built seed rather than being a native MusicRNN input; energy also adjusts the bounded continuation temperature. If Magenta cannot load, the local generator returns immediately.
-
-**Generate bass** is client-side and deterministic. It writes a 32-step Bass pattern using the selected genre, energy level, and either the minor or Phrygian scale.
-
-## Architecture
-
-- `index.html` — static application shell, controls, and CDN script declarations.
-- `styles.css` — responsive interface and control styling.
-- `script.js` — sequencer state, Web Audio engine, Tone.js instruments, sample loading and fallbacks, persistence, and client-side generation.
-- `api/generate-pattern.js` — stateless Vercel Node.js Function for deterministic drum patterns.
-- `scripts/dev-server.js` — zero-dependency local static/API development server.
-- `scripts/build-static.js` — deterministic Vercel static-output packager.
-- `tests/generate-pattern.test.js` — Node test suite for API input handling and generation invariants.
-- `vercel.json` — function duration and response security-header configuration.
-
-There is no database, account system, or required third-party API call. The pattern endpoint performs bounded in-memory work and is suitable for low-cost serverless execution.
-
-## Requirements
-
-- Node.js 22.x for parity with the declared Vercel runtime.
-- A current browser with Web Audio, `fetch`, `AbortController`, and local storage.
-
-Internet access is optional for the server pattern generator but is needed for remote samples, Tone.js, NexusUI, Google Fonts, and the optional Magenta browser model. Sample instruments retain procedural playback when their remote files fail; the five Tone.js instruments still depend on Tone.js loading successfully.
-
-## Local setup
+Requirements: Node.js 22.x and a current browser.
 
 ```bash
-git clone https://github.com/jgazcagtz/dm99v2.git
-cd dm99v2
 npm install
 npm test
 npm run dev
 ```
 
-Open the printed `http://127.0.0.1:3000` URL. The zero-dependency development server serves both the static application and the same `/api/generate-pattern` handler exported to Vercel. If only the static files are served by another tool, the client should fall back to Magenta or the local rule generator.
+Open `http://127.0.0.1:3000`, tap **Enable audio**, and either tap steps or create three ideas in Pattern Lab.
 
-The package also exposes these commands:
+Useful commands:
 
 ```bash
-npm test       # Run the Node API/generator test suite
-npm run build  # Syntax-check code and prepare the generated public/ output
-npm run dev    # Serve the UI and pattern API locally on port 3000
+npm test       # Run all state, generator, audio, storage and export tests
+npm run build  # Syntax-check and prepare public/ for Vercel
+npm run dev    # Start the zero-dependency local UI/API server
 ```
 
-### Environment variables
+No environment variables are required. `.env.local.example` intentionally contains no token placeholder.
 
-No environment variable is required for the current application.
+## Playing DM99
 
-`.env.local.example` reserves this name for a possible future Hugging Face audio-preview integration:
+1. Select a kit and open the 26-track mixer to choose a lane and sound.
+2. Tap the grid to place events. Mobile shows steps 1–16 and 17–32 as two large-pad pages.
+3. Select a step to edit velocity, chance, ratchets, nudge, accent, pitch, scale, or slide.
+4. Describe a groove or adjust Pattern Lab, then create three candidates and apply one.
+5. Lock any lane you want to preserve before generating or evolving again.
+6. Use pattern slots A–H to build alternate sections.
+7. Save locally, export MIDI/JSON/WAV, or copy a pattern-only link.
 
-```dotenv
-HUGGINGFACE_API_KEY=
-```
+Keyboard performance mapping:
 
-The application does not import the Hugging Face SDK or send requests to Hugging Face today. Adding this variable alone does not enable a model or change pattern generation.
+| Keys | Tracks |
+| --- | --- |
+| `A S D F G H J K L ;` | Kick, Snare, Clap, HHC, HHO, Tom, Perc1, Perc2, Crash, Ride |
+| `Q W E R T Y` | Bass, Acid, Sub, FM, Pluck, AM |
+| `Space` | Play/stop |
+| `1`–`8` | Pattern A–H |
+| Arrow keys | Move through the visible step page |
+
+## Projects and privacy
+
+Projects and revisions are stored in IndexedDB when available, with safe localStorage or in-memory fallbacks. User samples are stored as browser-local Blobs. No project, recording, MIDI performance, or sample is uploaded.
+
+- JSON contains the complete editable v3 state.
+- MIDI is SMF type 1 and maps drums to General MIDI notes.
+- WAV is rendered locally through `OfflineAudioContext` with the current voices, mixer settings, probability seed, and effect tail.
+- Pattern links use native gzip when available; the UI removes project names and sample metadata, and embedded Blob data is rejected.
+- Local storage is device/browser specific; export JSON for a portable backup.
 
 ## Pattern API
 
-### `POST /api/generate-pattern`
-
-Request headers:
-
-```http
-Content-Type: application/json
-```
-
-Request body:
+`POST /api/generate-pattern` is a stateless, zero-dependency Vercel Node function. It is useful for integrations but is not in the browser playback or generation critical path.
 
 ```json
 {
-  "genre": "techno",
-  "bpm": 138,
-  "energy": 0.7,
-  "length": 32
-}
-```
-
-| Field | Accepted values |
-| --- | --- |
-| `genre` | `techno`, `house`, `trance`, or `dnb`; common Drum & Bass spellings are normalized to `dnb` |
-| `bpm` | Number from 40 through 240 |
-| `energy` | Number from 0 through 1 |
-| `length` | Whole number from 8 through 64 |
-
-The browser integration always requests 32 steps. The wider API length range exists for direct API consumers.
-
-Successful response, abridged to show its shape:
-
-```json
-{
-  "success": true,
-  "pattern": {
-    "kick": [true, false, false, false],
-    "snare": [false, false, false, false],
-    "hihatClosed": [false, false, true, false]
-  },
-  "genre": "techno",
-  "bpm": 138,
-  "energy": 0.7,
+  "genre": "dnb",
+  "bpm": 174,
+  "energy": 0.82,
   "length": 32,
-  "meta": {
-    "energyTier": 7,
-    "hitCount": 52,
-    "generator": "deterministic-rule-based-v2"
-  },
-  "message": "Pattern generated successfully"
+  "seed": "warehouse-7",
+  "variation": "b",
+  "complexity": 0.7,
+  "syncopation": 0.75,
+  "humanize": 0.18
 }
 ```
 
-The actual `pattern` contains nine boolean arrays—`kick`, `snare`, `hihatClosed`, `hihatOpened`, `clap`, `tom`, `perc1`, `perc2`, and `perc3`—and every array has exactly the requested length. For identical normalized inputs, the response pattern is identical. Every 0.1 energy increase adds hits to a 32-step pattern without removing the lower-energy groove.
+Accepted genres are `techno`, `house`, `trance`, `dnb`, `electro`, `industrial`, `acid`, and `ambient`. Length is 8–64 steps, BPM is 40–240, variation is `a`, `b`, or `c`, and all four intensity controls are bounded from 0 to 1. The request body is capped at 4 KB.
 
-Example request:
+Successful responses contain 11 equal-length boolean lanes: Kick, Snare, HHC, HHO, Clap, Tom, Perc1, Perc2, Perc3, Crash, and Ride. Identical normalized inputs produce identical patterns.
 
 ```bash
-curl -X POST http://localhost:3000/api/generate-pattern \
+curl -X POST http://127.0.0.1:3000/api/generate-pattern \
   -H "Content-Type: application/json" \
-  -d '{"genre":"dnb","bpm":174,"energy":0.8,"length":32}'
+  -d '{"genre":"dnb","bpm":174,"energy":0.82,"length":32,"seed":"warehouse-7"}'
 ```
 
-Error responses are also JSON:
+Errors are JSON with a stable `code` and sanitized `error` message. Unsupported methods return `405` with `Allow: POST`; invalid JSON/fields return `400`, oversized input returns `413`, and the wrong media type returns `415`.
 
-```json
-{
-  "success": false,
-  "code": "INVALID_ENERGY",
-  "error": "energy must be between 0 and 1.",
-  "details": {
-    "field": "energy"
-  }
-}
-```
+## Architecture
 
-| Status | Meaning |
-| ---: | --- |
-| `400` | Invalid JSON or an invalid field |
-| `405` | Method other than POST; the response includes `Allow: POST` |
-| `413` | Body exceeds 4096 bytes |
-| `415` | Content type is not `application/json` |
-| `500` | Unexpected server error with implementation details withheld |
+| Path | Responsibility |
+| --- | --- |
+| `index.html`, `styles.css`, `script.js` | Accessible groovebox UI and browser integration |
+| `src/instruments.js` | 26-track registry, 124 presets and eight kits |
+| `src/audio-dsp.js`, `src/audio-engine.js` | Native live/offline Web Audio engines |
+| `src/project-state.js` | Canonical v3 state and legacy normalization |
+| `src/pattern-engine.js` | Seeded generation and transformations |
+| `src/project-store.js`, `src/sampler-store.js` | IndexedDB persistence and safe fallbacks |
+| `src/exporters.js`, `src/binary-utils.js` | JSON, MIDI, WAV and share-link codecs |
+| `api/generate-pattern.js` | Optional stateless JSON pattern API |
+| `service-worker.js`, `manifest.webmanifest` | Installation and offline shell |
 
-## Testing
+## Verification
 
-Run the automated checks:
+Automated coverage checks generator determinism/bounds, schema migration, A–H state, expressive steps, the full preset registry, live and offline audio-graph scheduling, project revisions/autosave, sample quotas, and JSON/MIDI/WAV/share codecs.
 
-```bash
-npm test
-npm run build
-```
+Before publishing a release, also verify in a real browser:
 
-The Node suite verifies:
-
-- all four genres at the minimum, default, and maximum supported lengths;
-- exact boolean-array bounds for all nine generated tracks;
-- deterministic repeatability;
-- distinct genre foundations;
-- increasing density at every 0.1 energy step;
-- safe normalization and fail-closed input validation;
-- POST, JSON media type, malformed JSON, and body-size handling.
-
-Before a release, also perform browser checks for all 26 instruments, server and fallback pattern sources, tempo/swing playback, mute/solo, save/load, small-screen layout, and console warnings from remote sample or CDN failures.
+- audio readiness reports 26/26 and every mixer lane auditions;
+- transport advances one audible playhead and stop releases voices;
+- all eight genres create three editable candidates offline;
+- saved generator/mixer state survives reload;
+- JSON, MIDI, and WAV downloads are valid and WAV contains audio signal;
+- imported audio can be edited, stored, restored, and auditioned;
+- 390×844 and 320×568 layouts have no horizontal overflow;
+- dialogs scroll, close with Escape, and return focus;
+- a service-worker-controlled reload succeeds with networking disabled;
+- the console is free of runtime warnings and errors.
 
 ## Deploying to Vercel
 
-The repository is a static site with one Node.js function. `package.json` declares Node.js 22.x, and `vercel.json` limits `api/*.js` to ten seconds and adds `nosniff`, frame-denial, and referrer-policy headers.
+Run `npm run build`, then deploy the repository with Vercel’s Git integration or CLI. `package.json` declares Node 22.x; `vercel.json` selects `public/`, bounds the optional function, and applies a same-origin CSP plus privacy/security headers.
 
-Create a preview deployment from the project root:
+No database, marketplace integration, AI Gateway, storage product, or paid provider needs to be provisioned. This repository has not been deployed merely by running the local build.
 
-```bash
-npx vercel
-```
+## Current boundaries
 
-After validating the preview, create a production deployment:
-
-```bash
-npx vercel --prod
-```
-
-Alternatively, import the repository through Vercel’s Git integration and keep the project root at the repository root. No output-directory override or database provisioning is required.
-
-A successful deployment command is not complete runtime proof. Verify the deployed `/` page, make a real JSON POST to `/api/generate-pattern`, test the browser fallback path, and confirm that all instruments either decode a remote sample or report a procedural fallback.
-
-## Current limitations
-
-- The server generator is rule-based, not generative model inference.
-- The optional Magenta fallback requires external CDN/checkpoint access and a substantial first-use download.
-- SampleSwap URL availability, CORS behavior, hotlink permission, and licensing are not controlled by this project.
-- The procedural sample fallback covers the 21 sample-backed slots, not a failure of the Tone.js CDN used by five synths.
-- Patterns are saved to one browser-local storage key; there is no cloud sync, multi-user library, or account recovery.
-- There is no MIDI import/export, rendered audio export, collaboration, or database.
-- The UI is fixed at 32 steps even though the API accepts 8–64 steps.
-- Browser autoplay rules may require a user gesture before audible playback.
-- Frontend behavior still needs real-browser and real-device verification in addition to the included server tests.
+- The sequencer is intentionally fixed at 32 editable steps per pattern.
+- Web MIDI, microphone recording, PWA installation, and offline audio rendering depend on browser support and permission.
+- IndexedDB quota and persistence policy are controlled by the browser/device.
+- Deleting an on-device sample removes the Blob; any older project revision that referenced it falls back to that lane's built-in local voice.
+- A newly cached PWA release activates after existing DM99 tabs close, preventing old and new audio modules from mixing in one session.
+- Pattern links exclude user samples and may be too long for some messaging platforms; JSON is the durable exchange format.
+- There is no account, cloud sync, collaborative room, stem separation, or hosted generative-audio service.
+- No third-party sample pack is bundled. Import only audio you have permission to use.
+- This repository currently has no explicit `LICENSE` file; do not infer a code license from the product description.
 
 ## Credits
 
-- Original DM99 concept and repository: J. Gazca
-- Audio engine: Web Audio API and Tone.js
-- Pitch controls: NexusUI
-- Optional browser model: Magenta MusicRNN
-- Configured remote sample source: SampleSwap, subject to its current availability and terms
+- Original DM99 concept: J. Gazca
+- Audio platform: the browser-native Web Audio API
+- Built-in voices and presets: procedurally generated by DM99

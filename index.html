@@ -1,183 +1,318 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DM99 AI — AI-Powered Drum Machine</title>
-    <meta name="description" content="DM99 AI — Professional browser-based drum machine with a 32-step sequencer, AI-assisted pattern generation, synth engine, EQ, filters, and ADSR controls.">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥁</text></svg>">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#08090d">
+  <meta name="description" content="DM99 is a free, local-first, AI-assisted electronic groovebox for the browser.">
+  <title>DM99 — Local AI Groovebox</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loading-screen">
-        <div class="loader-content">
-            <div class="loader-title">DM99</div>
-            <div class="loader-bar"><div id="loader-progress" class="loader-progress"></div></div>
-            <div id="loader-text" class="loader-text">Initializing audio engine...</div>
+  <a class="skip-link" href="#sequencer">Skip to sequencer</a>
+
+  <div id="loading-screen" class="loading-screen" role="status" aria-live="polite">
+    <div class="loading-mark" aria-hidden="true">DM</div>
+    <p id="loader-text">Preparing the local sound engines…</p>
+    <div class="loading-track" aria-hidden="true"><span id="loader-progress"></span></div>
+  </div>
+
+  <div id="app" class="app-shell hidden">
+    <header class="topbar">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true">DM</div>
+        <div>
+          <p class="eyebrow">Local AI groovebox</p>
+          <h1>DM99</h1>
         </div>
-    </div>
+      </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="toast"></div>
+      <div class="topbar-status" aria-live="polite">
+        <span id="audio-status-dot" class="status-dot"></span>
+        <span id="audio-status">Tap Enable Audio</span>
+        <span id="engine-source" class="source-chip">Local</span>
+      </div>
 
-    <!-- Main App (hidden until loaded) -->
-    <div id="app" class="hidden">
-        <!-- Header -->
-        <header id="header">
-            <div id="title">DM99 <span>AI</span></div>
-            <div id="master-volume-container">
-                <label for="master-volume">🔊 Master</label>
-                <input type="range" id="master-volume" min="0" max="1" step="0.01" value="1">
+      <div class="topbar-actions">
+        <label class="compact-range" for="master-volume">
+          <span>Master</span>
+          <input id="master-volume" type="range" min="0" max="1" value="0.82" step="0.01">
+        </label>
+        <button id="enable-audio" class="button primary" type="button">Enable audio</button>
+        <button id="install-app" class="button ghost hidden" type="button">Install</button>
+        <button id="guide-open" class="icon-button" type="button" aria-label="Open guide">?</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="performance-header panel" aria-labelledby="current-track-name">
+        <div class="track-identity">
+          <span id="current-track-group" class="eyebrow">Drums</span>
+          <h2 id="current-track-name">Kick</h2>
+          <span id="track-ready" class="ready-label">Ready</span>
+        </div>
+
+        <div class="sound-selector-grid">
+          <label>
+            <span>Kit</span>
+            <select id="kit-select"></select>
+          </label>
+          <label>
+            <span>Sound</span>
+            <select id="preset-select"></select>
+          </label>
+          <button id="audition-track" class="button secondary" type="button">Audition</button>
+          <button id="open-mixer" class="button ghost" type="button">26-track mixer</button>
+        </div>
+      </section>
+
+      <section id="sequencer" class="sequencer panel" aria-labelledby="sequencer-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Pattern <span id="active-pattern-name">A</span></p>
+            <h2 id="sequencer-title">32-step sequencer</h2>
+          </div>
+          <div class="step-pages" role="group" aria-label="Visible step page">
+            <button id="step-page-1" class="segmented active" type="button" aria-pressed="true">1–16</button>
+            <button id="step-page-2" class="segmented" type="button" aria-pressed="false">17–32</button>
+          </div>
+        </div>
+
+        <div class="beat-ruler" aria-hidden="true">
+          <span>1</span><span>2</span><span>3</span><span>4</span>
+          <span>5</span><span>6</span><span>7</span><span>8</span>
+        </div>
+        <div id="sequencer-grid" class="sequencer-grid" role="group" aria-label="Kick steps"></div>
+
+        <div class="sequence-actions">
+          <button id="random-pattern" class="button ghost" type="button">Randomize lane</button>
+          <button id="clear-pattern" class="button ghost danger" type="button">Clear lane</button>
+          <button id="capture-performance" class="button ghost" type="button">Capture performance</button>
+        </div>
+      </section>
+
+      <section class="transport panel" aria-label="Transport">
+        <div class="transport-main">
+          <button id="play" class="transport-button play" type="button" aria-label="Play">Play</button>
+          <button id="stop" class="transport-button" type="button" aria-label="Stop">Stop</button>
+          <button id="undo" class="transport-button compact" type="button" disabled>Undo</button>
+          <button id="redo" class="transport-button compact" type="button" disabled>Redo</button>
+        </div>
+
+        <label class="transport-control" for="tempo">
+          <span>Tempo <output id="bpm-display" for="tempo">120</output></span>
+          <input id="tempo" type="range" min="40" max="240" value="120" step="1">
+        </label>
+        <label class="transport-control" for="swing">
+          <span>Swing <output id="swing-display" for="swing">0%</output></span>
+          <input id="swing" type="range" min="0" max="75" value="0" step="1">
+        </label>
+
+        <div id="pattern-slots" class="pattern-slots" role="group" aria-label="Pattern slots"></div>
+      </section>
+
+      <div class="workspace-grid">
+        <section class="step-editor panel" aria-labelledby="step-editor-title">
+          <div class="section-heading compact-heading">
+            <div>
+              <p class="eyebrow">Per-step expression</p>
+              <h2 id="step-editor-title">Step editor</h2>
             </div>
-        </header>
-
-        <!-- Instrument Selector (generated dynamically by JS) -->
-        <div id="instrument-panel" class="panel"></div>
-
-        <!-- AI Pattern Generator -->
-        <section class="ai-controls panel" aria-labelledby="ai-controls-title">
-            <div class="ai-controls-heading">
-                <div>
-                    <p class="eyebrow">Pattern assistant</p>
-                    <h2 id="ai-controls-title">AI Pattern Generator</h2>
-                </div>
-                <span class="ai-mode-badge">Server + browser fallback</span>
-            </div>
-
-            <div class="ai-controls-grid">
-                <label class="ai-field" for="genre-select">
-                    <span>Genre</span>
-                    <select id="genre-select">
-                        <option value="techno">Techno</option>
-                        <option value="house">House</option>
-                        <option value="trance">Trance</option>
-                        <option value="dnb">Drum &amp; Bass</option>
-                    </select>
-                </label>
-
-                <label class="ai-field ai-energy" for="energy-slider">
-                    <span>Energy <output id="energy-display" for="energy-slider">0.7</output></span>
-                    <input type="range" id="energy-slider" min="0" max="1" step="0.1" value="0.7">
-                </label>
-
-                <div class="ai-actions">
-                    <button id="ai-generate-drums" class="ai-button ai-button-primary" type="button">Generate drums</button>
-                    <button id="ai-generate-bass" class="ai-button ai-button-secondary" type="button">Generate bass</button>
-                    <button id="ai-clear" class="ai-button ai-button-ghost" type="button">Clear all</button>
-                </div>
-            </div>
-
-            <p id="ai-status" class="ai-status" role="status" aria-live="polite">Choose a style and generate a new 32-step pattern.</p>
+            <strong id="selected-step-label">Select a step</strong>
+          </div>
+          <p id="step-editor-empty" class="empty-state">Choose a sequencer pad to edit its performance details.</p>
+          <div id="step-editor-controls" class="step-editor-controls hidden">
+            <label>Velocity <output id="velocity-output">85%</output><input id="step-velocity" type="range" min="0" max="1" value="0.85" step="0.01"></label>
+            <label>Probability <output id="probability-output">100%</output><input id="step-probability" type="range" min="0" max="1" value="1" step="0.01"></label>
+            <label>Ratchet <output id="ratchet-output">1×</output><input id="step-ratchet" type="range" min="1" max="4" value="1" step="1"></label>
+            <label>Nudge <output id="nudge-output">0 ms</output><input id="step-nudge" type="range" min="-45" max="45" value="0" step="1"></label>
+            <label>Pitch <output id="pitch-output">0</output><input id="step-pitch" type="range" min="-24" max="24" value="0" step="1"></label>
+            <label>Scale <select id="step-scale"><option value="minor">Minor</option><option value="phrygian">Phrygian</option><option value="dorian">Dorian</option><option value="major">Major</option><option value="chromatic">Chromatic</option></select></label>
+            <label class="toggle-row"><input id="step-accent" type="checkbox"><span>Accent</span></label>
+            <label class="toggle-row"><input id="step-slide" type="checkbox"><span>Slide</span></label>
+          </div>
         </section>
 
-        <!-- Drum Machine Pads -->
-        <div id="drum-machine"></div>
+        <section class="pattern-lab panel" aria-labelledby="pattern-lab-title">
+          <div class="section-heading compact-heading">
+            <div>
+              <p class="eyebrow">Instant local composition intelligence</p>
+              <h2 id="pattern-lab-title">Pattern Lab</h2>
+            </div>
+            <span id="pattern-source" class="source-chip">Local engine</span>
+          </div>
 
-        <!-- Transport Controls -->
-        <div id="controls">
-            <button id="play" class="control-button">▶️ Play</button>
-            <button id="stop" class="control-button">⏹️ Stop</button>
-            <button id="random-pattern" class="control-button">🎲 Random</button>
-            <button id="clear-pattern" class="control-button">🗑️ Clear</button>
-            <button id="save-pattern" class="control-button">💾 Save</button>
-            <button id="load-pattern" class="control-button">📂 Load</button>
-            <button id="show-instructions" class="control-button">📖 Guide</button>
+          <label class="prompt-field" for="prompt-input">
+            <span>Describe a groove</span>
+            <input id="prompt-input" type="text" maxlength="120" placeholder="dark techno, busy hats, less kick">
+          </label>
+
+          <div class="lab-controls">
+            <label>Genre<select id="genre-select"><option value="techno">Techno</option><option value="house">Deep House</option><option value="electro">Electro</option><option value="trance">Trance</option><option value="dnb">Drum & Bass</option><option value="industrial">Industrial</option><option value="acid">Acid</option><option value="ambient">Ambient</option></select></label>
+            <label>Bars<select id="bars-select"><option value="1">1</option><option value="2" selected>2</option></select></label>
+            <label>Seed<input id="seed-input" type="text" maxlength="32" value="dm99"></label>
+            <label>Energy <output id="energy-output">70%</output><input id="energy-slider" type="range" min="0" max="1" value="0.7" step="0.01"></label>
+            <label>Complexity <output id="complexity-output">55%</output><input id="complexity-slider" type="range" min="0" max="1" value="0.55" step="0.01"></label>
+            <label>Syncopation <output id="syncopation-output">35%</output><input id="syncopation-slider" type="range" min="0" max="1" value="0.35" step="0.01"></label>
+            <label>Humanize <output id="humanize-output">12%</output><input id="humanize-slider" type="range" min="0" max="1" value="0.12" step="0.01"></label>
+          </div>
+
+          <div class="lab-actions">
+            <button id="generate-variations" class="button primary" type="button">Create 3 variations</button>
+            <button id="evolve-variation" class="button secondary" type="button">Evolve current pattern</button>
+            <button id="lock-current-track" class="button ghost" type="button" aria-pressed="false">Lock current lane</button>
+          </div>
+          <p id="ai-status" class="assistive-status" aria-live="polite">Local generation is ready and requires no network.</p>
+          <div id="variation-list" class="variation-list"></div>
+
+          <div class="transform-grid" aria-label="Pattern transformations">
+            <button type="button" data-transform="rotate-left">Rotate −</button>
+            <button type="button" data-transform="rotate-right">Rotate +</button>
+            <button type="button" data-transform="reverse">Reverse</button>
+            <button type="button" data-transform="mirror">Mirror</button>
+            <button type="button" data-transform="sparse">Sparse</button>
+            <button type="button" data-transform="dense">Dense</button>
+            <button type="button" data-transform="fill">Add fill</button>
+            <button type="button" data-transform="euclidean">Euclidean</button>
+          </div>
+        </section>
+      </div>
+
+      <section class="project-studio panel" aria-labelledby="project-studio-title">
+        <div class="section-heading compact-heading">
+          <div>
+            <p class="eyebrow">Everything stays on this device</p>
+            <h2 id="project-studio-title">Projects, export & sampler</h2>
+          </div>
+          <span id="autosave-status" class="ready-label">Autosave ready</span>
         </div>
 
-        <!-- Slider Controls -->
-        <div id="slider-controls" class="panel">
-            <div class="control-group">
-                <label for="tempo">Tempo</label>
-                <input type="range" id="tempo" min="60" max="200" value="120">
-                <span id="bpm-display" class="val-display">120</span>
-            </div>
-            <div class="control-group">
-                <label for="swing">Swing</label>
-                <input type="range" id="swing" min="0" max="100" value="0">
-                <span id="swing-display" class="val-display">0%</span>
-            </div>
-            <div class="control-group">
-                <label for="lowpass-filter">LP Filter</label>
-                <input type="range" id="lowpass-filter" min="200" max="20000" step="100" value="20000">
-                <span id="lowpass-display" class="val-display">20k Hz</span>
-            </div>
-            <div class="control-group">
-                <label for="highpass-filter">HP Filter</label>
-                <input type="range" id="highpass-filter" min="20" max="2000" step="10" value="20">
-                <span id="highpass-display" class="val-display">20 Hz</span>
-            </div>
+        <div class="studio-tabs" role="tablist" aria-label="Studio tools">
+          <button id="projects-tab" role="tab" aria-selected="true" aria-controls="projects-panel">Projects</button>
+          <button id="export-tab" role="tab" aria-selected="false" aria-controls="export-panel">Export</button>
+          <button id="sampler-tab" role="tab" aria-selected="false" aria-controls="sampler-panel">Sampler</button>
+          <button id="midi-tab" role="tab" aria-selected="false" aria-controls="midi-panel">MIDI</button>
         </div>
 
-        <!-- EQ Controls -->
-        <div id="eq-panel" class="panel">
-            <div class="eq-section">
-                <h3>Master EQ</h3>
-                <div class="eq-controls">
-                    <div class="control-group"><label for="eq-low">Low</label><input type="range" id="eq-low" min="-30" max="30" step="1" value="0"><span id="eq-low-display" class="val-display">0 dB</span></div>
-                    <div class="control-group"><label for="eq-mid">Mid</label><input type="range" id="eq-mid" min="-30" max="30" step="1" value="0"><span id="eq-mid-display" class="val-display">0 dB</span></div>
-                    <div class="control-group"><label for="eq-high">High</label><input type="range" id="eq-high" min="-30" max="30" step="1" value="0"><span id="eq-high-display" class="val-display">0 dB</span></div>
-                </div>
-            </div>
-            <div class="eq-section">
-                <h3>Synth / Bass EQ</h3>
-                <div class="eq-controls">
-                    <div class="control-group"><label for="bass-eq-low">Low</label><input type="range" id="bass-eq-low" min="-30" max="30" step="1" value="0"><span id="bass-eq-low-display" class="val-display">0 dB</span></div>
-                    <div class="control-group"><label for="bass-eq-mid">Mid</label><input type="range" id="bass-eq-mid" min="-30" max="30" step="1" value="0"><span id="bass-eq-mid-display" class="val-display">0 dB</span></div>
-                    <div class="control-group"><label for="bass-eq-high">High</label><input type="range" id="bass-eq-high" min="-30" max="30" step="1" value="0"><span id="bass-eq-high-display" class="val-display">0 dB</span></div>
-                </div>
-            </div>
+        <div id="projects-panel" class="studio-panel" role="tabpanel" aria-labelledby="projects-tab">
+          <label>Project name<input id="project-name" type="text" maxlength="60" value="Untitled groove"></label>
+          <label>Saved projects<select id="project-select"><option value="">No saved projects</option></select></label>
+          <label>Revision history<select id="project-revision-select" disabled><option value="">Save a project to create revisions</option></select></label>
+          <div class="button-row">
+            <button id="save-project" class="button primary" type="button">Save project</button>
+            <button id="load-project" class="button secondary" type="button">Load</button>
+            <button id="restore-revision" class="button ghost" type="button" disabled>Restore revision</button>
+            <button id="delete-project" class="button ghost danger" type="button">Delete</button>
+          </div>
         </div>
 
-        <!-- ADSR Controls (content generated dynamically by JS) -->
-        <div id="adsr-controls" class="panel">
-            <h3 id="adsr-toggle">ADSR Controls ▼</h3>
-            <div id="adsr-content"></div>
+        <div id="export-panel" class="studio-panel hidden" role="tabpanel" aria-labelledby="export-tab">
+          <div class="button-row wrap">
+            <button id="export-json" class="button secondary" type="button">Project JSON</button>
+            <label class="button ghost file-button">Import JSON<input id="import-json" type="file" accept="application/json,.json"></label>
+            <button id="export-midi" class="button secondary" type="button">MIDI</button>
+            <label class="button ghost file-button">Import MIDI<input id="import-midi" type="file" accept="audio/midi,audio/x-midi,.mid,.midi"></label>
+            <button id="export-wav" class="button primary" type="button">WAV mixdown</button>
+            <button id="share-pattern" class="button ghost" type="button">Copy pattern link</button>
+          </div>
+          <p class="fine-print">Pattern links contain sequencer and mix settings. Project names, sample metadata, and audio are removed.</p>
         </div>
 
-        <!-- Buy Me a Coffee -->
-        <a href="https://www.buymeacoffee.com/georgegeorge" class="buy-me-coffee" target="_blank" aria-label="Support us with a beer">🍺 Buy Me a Beer</a>
+        <div id="sampler-panel" class="studio-panel hidden" role="tabpanel" aria-labelledby="sampler-tab">
+          <div class="sampler-toolbar">
+            <label>Target track<select id="sample-track-select"></select></label>
+            <label class="button secondary file-button">Import audio<input id="sample-import" type="file" accept="audio/*"></label>
+            <button id="record-sample" class="button ghost" type="button">Record microphone</button>
+            <button id="stop-recording" class="button ghost danger" type="button" disabled>Stop recording</button>
+          </div>
+          <div class="sample-library" aria-labelledby="sample-library-title">
+            <div>
+              <strong id="sample-library-title">On-device sample library</strong>
+              <span id="sample-library-usage">No saved samples</span>
+            </div>
+            <label>Saved audio<select id="sample-library-select" disabled><option value="">No saved samples</option></select></label>
+            <button id="load-library-sample" class="button ghost" type="button" disabled>Load to editor</button>
+            <button id="delete-library-sample" class="button ghost danger" type="button" disabled>Delete sample</button>
+          </div>
+          <canvas id="sample-waveform" width="960" height="180" aria-label="Imported sample waveform"></canvas>
+          <div id="sample-editor" class="sample-editor hidden">
+            <label>Start <output id="sample-start-output">0%</output><input id="sample-start" type="range" min="0" max="99" value="0" step="1"></label>
+            <label>End <output id="sample-end-output">100%</output><input id="sample-end" type="range" min="1" max="100" value="100" step="1"></label>
+            <label>Tune <output id="sample-tune-output">0 st</output><input id="sample-tune" type="range" min="-24" max="24" value="0" step="1"></label>
+            <label>Mode<select id="sample-mode"><option value="one-shot">One-shot</option><option value="gate">Gate</option><option value="loop">Loop</option></select></label>
+            <label>Choke group<select id="sample-choke"><option value="">None</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label>
+            <div class="button-row wrap">
+              <button id="normalize-sample" class="button ghost" type="button">Normalize</button>
+              <button id="reverse-sample" class="button ghost" type="button">Reverse</button>
+              <button id="slice-sample" class="button ghost" type="button">Slice to 4 lanes</button>
+              <button id="commit-sample" class="button primary" type="button">Use on track</button>
+            </div>
+          </div>
+          <p id="sample-status" class="assistive-status" aria-live="polite">Imported and recorded audio remains on this device.</p>
+        </div>
 
-        <!-- Footer -->
-        <footer>DM99 v2.0 | J.Gazca &copy; <span id="current-year"></span> | <kbd>Space</kbd> Play · <kbd>S</kbd> Save · <kbd>L</kbd> Load</footer>
+        <div id="midi-panel" class="studio-panel hidden" role="tabpanel" aria-labelledby="midi-tab">
+          <p>Connect a MIDI controller to play tracks and capture a performance. Browser permission is requested only when you enable it.</p>
+          <div class="button-row">
+            <button id="enable-midi" class="button secondary" type="button">Enable Web MIDI</button>
+            <select id="midi-input" aria-label="MIDI input"><option value="">No MIDI input</option></select>
+          </div>
+          <p id="midi-status" class="assistive-status" aria-live="polite">MIDI is optional.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>DM99 local groovebox</span>
+      <span>No accounts · No uploads · No paid AI</span>
+      <a href="https://www.buymeacoffee.com/georgegeorge" target="_blank" rel="noopener noreferrer">Support the project</a>
+    </footer>
+  </div>
+
+  <dialog id="mixer-dialog" class="mixer-dialog" aria-labelledby="mixer-title">
+    <div class="dialog-heading">
+      <div><p class="eyebrow">26 local voices</p><h2 id="mixer-title">Mixer & sound design</h2></div>
+      <button id="close-mixer" class="icon-button" type="button" aria-label="Close mixer">×</button>
     </div>
+    <div id="mixer-tracks" class="mixer-tracks"></div>
+    <section class="master-fx" aria-labelledby="master-fx-title">
+      <h3 id="master-fx-title">Master colour</h3>
+      <label>Low-pass <output id="lowpass-output">20 kHz</output><input id="lowpass-filter" type="range" min="200" max="20000" value="20000" step="10"></label>
+      <label>High-pass <output id="highpass-output">20 Hz</output><input id="highpass-filter" type="range" min="20" max="4000" value="20" step="10"></label>
+      <label>Low EQ <output id="eq-low-output">0 dB</output><input id="master-eq-low" type="range" min="-12" max="12" value="0" step="0.5"></label>
+      <label>Mid EQ <output id="eq-mid-output">0 dB</output><input id="master-eq-mid" type="range" min="-12" max="12" value="0" step="0.5"></label>
+      <label>High EQ <output id="eq-high-output">0 dB</output><input id="master-eq-high" type="range" min="-12" max="12" value="0" step="0.5"></label>
+      <label>Drive <output id="drive-output">0%</output><input id="master-drive" type="range" min="0" max="1" value="0" step="0.01"></label>
+      <label>Delay <output id="delay-output">12%</output><input id="master-delay" type="range" min="0" max="0.7" value="0.12" step="0.01"></label>
+      <label>Space <output id="reverb-output">8%</output><input id="master-reverb" type="range" min="0" max="0.7" value="0.08" step="0.01"></label>
+    </section>
+  </dialog>
 
-    <!-- Instructions Modal -->
-    <div id="modal">
-        <div id="modal-content">
-            <button id="close-modal">&times;</button>
-            <h2>User Guide 📖</h2>
-            <ul>
-                <li>Select an instrument by clicking its name in the instrument panel.</li>
-                <li>Click on pads to activate/deactivate steps for that instrument.</li>
-                <li>For pitched instruments (Bass, Acid, Synth, Sub, 808), use the knob on active pads to change pitch.</li>
-                <li>Use 🔇 mute, 🔊 solo, and volume sliders to mix instruments.</li>
-                <li>Adjust Tempo, Swing, Low-Pass and High-Pass filters with the sliders.</li>
-                <li>Use the Master EQ and Synth/Bass EQ to shape the overall sound.</li>
-                <li>Expand ADSR Controls to shape attack, decay, sustain, and release per instrument.</li>
-                <li>Choose a genre and energy level, then use Generate drums or Generate bass to build an AI-assisted pattern.</li>
-                <li>If the server is unavailable, drum generation automatically falls back to browser-side Magenta or the built-in generator.</li>
-                <li>Click ▶️ Play to start and ⏹️ Stop to stop the sequence.</li>
-                <li>🎲 Random generates a random pattern for the selected instrument (pitched instruments get melodic lines).</li>
-                <li>💾 Save / 📂 Load persist your pattern in the browser.</li>
-            </ul>
-            <h3>Keyboard Shortcuts</h3>
-            <ul>
-                <li><kbd>Space</kbd> — Play / Stop</li>
-                <li><kbd>S</kbd> — Save pattern</li>
-                <li><kbd>L</kbd> — Load pattern</li>
-                <li><kbd>C</kbd> — Clear current instrument</li>
-            </ul>
-        </div>
+  <dialog id="guide-dialog" class="guide-dialog" aria-labelledby="guide-title">
+    <div class="dialog-heading">
+      <div><p class="eyebrow">Quick start</p><h2 id="guide-title">Make a groove in seconds</h2></div>
+      <button id="guide-close" class="icon-button" type="button" aria-label="Close guide">×</button>
     </div>
+    <ol class="guide-steps">
+      <li><strong>Enable audio.</strong> DM99 creates its engines locally after your gesture.</li>
+      <li><strong>Tap steps.</strong> Select an instrument in the mixer, then build its pattern.</li>
+      <li><strong>Shape each hit.</strong> Velocity, probability, ratchet, nudge, pitch and accents are editable.</li>
+      <li><strong>Generate ideas.</strong> Pattern Lab produces three instant, editable variations without a server.</li>
+      <li><strong>Make it yours.</strong> Swap procedural sounds, import or record samples, and adjust the mixer.</li>
+      <li><strong>Keep the work.</strong> Save locally or export JSON, MIDI and WAV.</li>
+    </ol>
+    <div class="shortcut-grid">
+      <span><kbd>Space</kbd> Play / stop</span>
+      <span><kbd>1–8</kbd> Select pattern</span>
+      <span><kbd>↑ ↓ ← →</kbd> Move between steps</span>
+      <span><kbd>Enter</kbd> Toggle step</span>
+      <span><kbd>Esc</kbd> Close dialogs</span>
+    </div>
+  </dialog>
 
-    <!-- Tone.js Synth Engine -->
-    <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.min.js"></script>
-    <!-- NexusUI for pitch knobs -->
-    <script src="https://cdn.jsdelivr.net/npm/nexusui@2.0.1/dist/NexusUI.min.js"></script>
-    <script src="script.js"></script>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
