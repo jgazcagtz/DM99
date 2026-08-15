@@ -1,0 +1,7 @@
+.git/
+.playwright-cli/
+node_modules/
+output/
+public/
+tests/
+.env*

@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DM99 — Drum Machine</title>
-    <meta name="description" content="DM99 — Professional browser-based drum machine and step sequencer with 23 instruments, synth engine, EQ, filters, and ADSR controls.">
+    <title>DM99 AI — AI-Powered Drum Machine</title>
+    <meta name="description" content="DM99 AI — Professional browser-based drum machine with a 32-step sequencer, AI-assisted pattern generation, synth engine, EQ, filters, and ADSR controls.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥁</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -27,7 +28,7 @@
     <div id="app" class="hidden">
         <!-- Header -->
         <header id="header">
-            <div id="title">DM99</div>
+            <div id="title">DM99 <span>AI</span></div>
             <div id="master-volume-container">
                 <label for="master-volume">🔊 Master</label>
                 <input type="range" id="master-volume" min="0" max="1" step="0.01" value="1">
@@ -36,6 +37,42 @@
 
         <!-- Instrument Selector (generated dynamically by JS) -->
         <div id="instrument-panel" class="panel"></div>
+
+        <!-- AI Pattern Generator -->
+        <section class="ai-controls panel" aria-labelledby="ai-controls-title">
+            <div class="ai-controls-heading">
+                <div>
+                    <p class="eyebrow">Pattern assistant</p>
+                    <h2 id="ai-controls-title">AI Pattern Generator</h2>
+                </div>
+                <span class="ai-mode-badge">Server + browser fallback</span>
+            </div>
+
+            <div class="ai-controls-grid">
+                <label class="ai-field" for="genre-select">
+                    <span>Genre</span>
+                    <select id="genre-select">
+                        <option value="techno">Techno</option>
+                        <option value="house">House</option>
+                        <option value="trance">Trance</option>
+                        <option value="dnb">Drum &amp; Bass</option>
+                    </select>
+                </label>
+
+                <label class="ai-field ai-energy" for="energy-slider">
+                    <span>Energy <output id="energy-display" for="energy-slider">0.7</output></span>
+                    <input type="range" id="energy-slider" min="0" max="1" step="0.1" value="0.7">
+                </label>
+
+                <div class="ai-actions">
+                    <button id="ai-generate-drums" class="ai-button ai-button-primary" type="button">Generate drums</button>
+                    <button id="ai-generate-bass" class="ai-button ai-button-secondary" type="button">Generate bass</button>
+                    <button id="ai-clear" class="ai-button ai-button-ghost" type="button">Clear all</button>
+                </div>
+            </div>
+
+            <p id="ai-status" class="ai-status" role="status" aria-live="polite">Choose a style and generate a new 32-step pattern.</p>
+        </section>
 
         <!-- Drum Machine Pads -->
         <div id="drum-machine"></div>
@@ -49,7 +86,6 @@
             <button id="save-pattern" class="control-button">💾 Save</button>
             <button id="load-pattern" class="control-button">📂 Load</button>
             <button id="show-instructions" class="control-button">📖 Guide</button>
-            <button id="settings-btn" class="control-button">⚙️ Settings</button>
         </div>
 
         <!-- Slider Controls -->
@@ -122,6 +158,8 @@
                 <li>Adjust Tempo, Swing, Low-Pass and High-Pass filters with the sliders.</li>
                 <li>Use the Master EQ and Synth/Bass EQ to shape the overall sound.</li>
                 <li>Expand ADSR Controls to shape attack, decay, sustain, and release per instrument.</li>
+                <li>Choose a genre and energy level, then use Generate drums or Generate bass to build an AI-assisted pattern.</li>
+                <li>If the server is unavailable, drum generation automatically falls back to browser-side Magenta or the built-in generator.</li>
                 <li>Click ▶️ Play to start and ⏹️ Stop to stop the sequence.</li>
                 <li>🎲 Random generates a random pattern for the selected instrument (pitched instruments get melodic lines).</li>
                 <li>💾 Save / 📂 Load persist your pattern in the browser.</li>
@@ -133,23 +171,6 @@
                 <li><kbd>L</kbd> — Load pattern</li>
                 <li><kbd>C</kbd> — Clear current instrument</li>
             </ul>
-        </div>
-    </div>
-
-    <!-- Settings Modal -->
-    <div id="settings-modal">
-        <div id="settings-content">
-            <button id="close-settings">&times;</button>
-            <h2>⚙️ Settings</h2>
-            <div class="setting-row">
-                <label for="freesound-api-key">Freesound API Key</label>
-                <input type="text" id="freesound-api-key" placeholder="Enter your API key">
-                <small>Get one free at <a href="https://freesound.org/apiv2/apply/" target="_blank" style="color:var(--accent)">freesound.org/apiv2/apply</a></small>
-            </div>
-            <div class="setting-actions">
-                <button id="save-settings" class="control-button">💾 Save Key</button>
-                <button id="fetch-sounds-btn" class="control-button">🔍 Fetch Missing Samples</button>
-            </div>
         </div>
     </div>
 

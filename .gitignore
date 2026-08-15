@@ -1,0 +1,8 @@
+node_modules/
+.vercel/
+.env.local
+output/
+.playwright-cli/
+public/
+
+.vercel

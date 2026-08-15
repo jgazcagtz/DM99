@@ -2,58 +2,79 @@
 //  DM99 v2.0 — Config-Driven Drum Machine & Step Sequencer
 // ═══════════════════════════════════════════════════════════════════
 
+const SEQUENCE_LENGTH = 32;
+
+const SOUND_BASE = 'https://sampleswap.org/samples';
+const sounds = Object.freeze({
+    kick: `${SOUND_BASE}/DRUMS/kick-techno-120.wav`,
+    snare: `${SOUND_BASE}/DRUMS/snare-acid-023.wav`,
+    hihatClosed: `${SOUND_BASE}/DRUMS/hihat-closed-techno-012.wav`,
+    hihatOpened: `${SOUND_BASE}/DRUMS/hihat-open-015.wav`,
+    clap: `${SOUND_BASE}/DRUMS/clap-techno-008.wav`,
+    bass1: `${SOUND_BASE}/BASS/acid-bass-128.wav`,
+    tom: `${SOUND_BASE}/DRUMS/tom-mid-034.wav`,
+    perc1: `${SOUND_BASE}/PERC/shaker-techno-019.wav`,
+    perc2: `${SOUND_BASE}/PERC/cowbell-techno-003.wav`,
+    perc3: `${SOUND_BASE}/PERC/ride-techno-011.wav`,
+    acid: `${SOUND_BASE}/SYNTH/acid-line-138.wav`,
+    synth: `${SOUND_BASE}/SYNTH/stab-techno-025.wav`,
+    crash: `${SOUND_BASE}/DRUMS/crash-techno-007.wav`,
+    ride: `${SOUND_BASE}/DRUMS/ride-techno-011.wav`,
+});
+const REMOTE_SAMPLE_LIBRARY_ENABLED = new URLSearchParams(window.location.search).get('remoteSamples') === '1';
+
 // ============= INSTRUMENT CONFIGURATION =============
 const INSTRUMENTS = [
     // --- Drums ---
     { id: 'kick', label: 'Kick', group: 'Drums', volume: 0.8, mono: true,
-      url: 'https://cdn.freesound.org/previews/348/348054_6244580-lq.mp3',
+      url: sounds.kick,
       adsr: { attack: 0.01, decay: 0.3, sustain: 0.0, release: 0.2 } },
     { id: 'snare', label: 'Snare', group: 'Drums', volume: 0.7,
-      url: 'https://cdn.freesound.org/previews/25/25666_48671-lq.mp3' },
+      url: sounds.snare },
     { id: 'clap', label: 'Clap', group: 'Drums', volume: 0.7,
-      url: 'https://cdn.freesound.org/previews/244/244568_165785-lq.mp3' },
+      url: sounds.clap },
     { id: 'tom', label: 'Tom', group: 'Drums', volume: 0.7,
-      url: 'https://cdn.freesound.org/previews/443/443181_6979693-lq.mp3' },
+      url: sounds.tom },
     { id: 'rimshot', label: 'Rim', group: 'Drums', volume: 0.65,
-      url: 'https://cdn.freesound.org/previews/250/250552_4486188-lq.mp3' },
+      url: sounds.snare },
     { id: 'cowbell', label: 'Cow', group: 'Drums', volume: 0.55,
-      url: 'https://cdn.freesound.org/previews/351/351649_6295857-lq.mp3' },
+      url: sounds.perc2 },
     // --- Cymbals ---
     { id: 'hihatClosed', label: 'HHC', group: 'Cymbals', volume: 0.6,
-      url: 'https://cdn.freesound.org/previews/638/638654_433684-lq.mp3',
+      url: sounds.hihatClosed,
       adsr: { attack: 0.005, decay: 0.15, sustain: 0.0, release: 0.1 } },
     { id: 'hihatOpened', label: 'HHO', group: 'Cymbals', volume: 0.6,
-      url: 'https://cdn.freesound.org/previews/627/627344_13191763-lq.mp3' },
+      url: sounds.hihatOpened },
     { id: 'crash', label: 'Crash', group: 'Cymbals', volume: 0.45,
-      url: 'https://cdn.freesound.org/previews/387/387186_7255534-lq.mp3' },
+      url: sounds.crash },
     { id: 'ride', label: 'Ride', group: 'Cymbals', volume: 0.45,
-      url: 'https://cdn.freesound.org/previews/398/398228_2613581-lq.mp3' },
+      url: sounds.ride },
     // --- Percussion ---
     { id: 'perc1', label: 'Perc1', group: 'Perc', volume: 0.6,
-      url: 'https://cdn.freesound.org/previews/724/724509_11990934-lq.mp3' },
+      url: sounds.perc1 },
     { id: 'perc2', label: 'Perc2', group: 'Perc', volume: 0.6,
-      url: 'https://cdn.freesound.org/previews/503/503788_9637845-lq.mp3' },
+      url: sounds.perc2 },
     { id: 'perc3', label: 'Perc3', group: 'Perc', volume: 0.6,
-      url: 'https://cdn.freesound.org/previews/503/503779_9637845-lq.mp3' },
+      url: sounds.perc3 },
     { id: 'perc4', label: 'Perc4', group: 'Perc', volume: 0.6,
-      url: 'https://cdn.freesound.org/previews/352/352280_1866366-lq.mp3' },
+      url: sounds.perc1 },
     { id: 'perc5', label: 'Perc5', group: 'Perc', volume: 0.6,
-      url: 'https://cdn.freesound.org/previews/638/638557_12672694-lq.mp3' },
+      url: sounds.perc2 },
     { id: 'perc6', label: 'Perc6', group: 'Perc', volume: 0.6,
-      url: 'https://cdn.freesound.org/previews/707/707194_6295857-lq.mp3' },
+      url: sounds.perc3 },
     { id: 'shaker', label: 'Shak', group: 'Perc', volume: 0.5,
-      url: 'https://cdn.freesound.org/previews/446/446461_7037_lq.mp3' },
+      url: sounds.perc1 },
     { id: 'tamb', label: 'Tamb', group: 'Perc', volume: 0.5,
-      url: 'https://cdn.freesound.org/previews/207/207920_19852-lq.mp3' },
+      url: sounds.perc1 },
     // --- Tonal (sample-based, pitched) ---
     { id: 'bass1', label: 'Bass', group: 'Tonal', volume: 0.5, mono: true, pitched: true,
-      url: 'https://cdn.freesound.org/previews/711/711469_15225418-lq.mp3',
+      url: sounds.bass1,
       adsr: { attack: 0.01, decay: 0.3, sustain: 0.7, release: 0.3 } },
     { id: 'acid', label: 'Acid', group: 'Tonal', volume: 0.6, pitched: true,
-      url: 'https://cdn.freesound.org/previews/21/21998_45941-lq.mp3',
+      url: sounds.acid,
       adsr: { attack: 0.01, decay: 0.2, sustain: 0.5, release: 0.2 } },
     { id: 'synth', label: 'Synth', group: 'Tonal', volume: 0.6, pitched: true,
-      url: 'https://cdn.freesound.org/previews/315/315610_2050105-lq.mp3',
+      url: sounds.synth,
       adsr: { attack: 0.05, decay: 0.3, sustain: 0.7, release: 0.5 } },
     // --- Synth (Tone.js powered, pitched) ---
     { id: 'sub', label: 'Sub', group: 'Synth', volume: 0.6, pitched: true,
@@ -84,7 +105,10 @@ const SCALES = {
 function getScalePitches(scale) { return SCALES[scale] || SCALES.minor; }
 
 // ============= AUDIO ENGINE =============
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const toneContext = typeof Tone !== 'undefined' && typeof Tone.getContext === 'function'
+    ? Tone.getContext()
+    : null;
+const audioCtx = toneContext?.rawContext || new (window.AudioContext || window.webkitAudioContext)();
 
 // Master compressor
 const masterCompressor = audioCtx.createDynamicsCompressor();
@@ -150,9 +174,10 @@ INSTRUMENTS.forEach(inst => {
 
 // ============= TONE.JS SYNTH ENGINE =============
 const toneInstruments = {};
+let toneInitialized = false;
 function initToneJS() {
+    if (toneInitialized) return;
     if (typeof Tone === 'undefined') { console.warn('Tone.js not loaded'); return; }
-    Tone.setContext(audioCtx);
     INSTRUMENTS.filter(i => i.tone).forEach(inst => {
         try {
             const ToneClass = Tone[inst.tone.type];
@@ -163,6 +188,7 @@ function initToneJS() {
             toneInstruments[inst.id] = synth;
         } catch(e) { console.warn(`Tone.js ${inst.tone.type} failed:`, e); }
     });
+    toneInitialized = true;
 }
 
 // ============= STATE =============
@@ -181,7 +207,7 @@ let activeKnobs = [];
 // Sequences — normalized: every instrument uses { active, pitch, scale }
 const sequences = {};
 INSTRUMENTS.forEach(inst => {
-    sequences[inst.id] = Array.from({ length: 32 }, () => ({ active: false, pitch: 0, scale: 'minor' }));
+    sequences[inst.id] = Array.from({ length: SEQUENCE_LENGTH }, () => ({ active: false, pitch: 0, scale: 'minor' }));
 });
 
 // Mute / Solo / Volume / ADSR — derived from config
@@ -198,42 +224,178 @@ INSTRUMENTS.forEach(inst => {
 
 // Audio buffers (for sample-based instruments)
 const buffers = {};
+const sampleSources = {};
 
 // ============= SOUND LOADING =============
+function createSeededNoise(seedText) {
+    let state = Array.from(seedText).reduce((seed, char) => ((seed * 31) + char.charCodeAt(0)) >>> 0, 2166136261);
+    return () => {
+        state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+        return (state / 2147483648) - 1;
+    };
+}
+
+function createProceduralSample(instrumentId) {
+    const durationById = {
+        kick: 0.55, snare: 0.38, clap: 0.32, tom: 0.5, rimshot: 0.18, cowbell: 0.42,
+        hihatClosed: 0.12, hihatOpened: 0.55, crash: 1.5, ride: 1.1,
+        bass1: 0.9, acid: 0.7, synth: 0.8
+    };
+    const duration = durationById[instrumentId] || 0.38;
+    const frameCount = Math.max(1, Math.floor(audioCtx.sampleRate * duration));
+    const audioBuffer = audioCtx.createBuffer(1, frameCount, audioCtx.sampleRate);
+    const channel = audioBuffer.getChannelData(0);
+    const noise = createSeededNoise(instrumentId);
+    let noisePrevious = 0;
+    let phase = 0;
+    let peak = 0;
+
+    for (let frame = 0; frame < frameCount; frame++) {
+        const time = frame / audioCtx.sampleRate;
+        const random = noise();
+        const brightNoise = random - noisePrevious * 0.82;
+        noisePrevious = random;
+        let value = 0;
+
+        if (instrumentId === 'kick') {
+            const frequency = 46 + (118 * Math.exp(-time * 34));
+            phase += (Math.PI * 2 * frequency) / audioCtx.sampleRate;
+            value = Math.sin(phase) * Math.exp(-time * 8.5) + random * 0.08 * Math.exp(-time * 45);
+        } else if (instrumentId === 'snare') {
+            value = brightNoise * 0.72 * Math.exp(-time * 13) + Math.sin(Math.PI * 2 * 185 * time) * 0.26 * Math.exp(-time * 18);
+        } else if (instrumentId === 'clap') {
+            const burst = [0, 0.022, 0.044].reduce((sum, start) => sum + (time >= start ? Math.exp(-(time - start) * 70) : 0), 0);
+            value = brightNoise * Math.min(1, burst) * 0.72 * Math.exp(-time * 4);
+        } else if (instrumentId === 'tom') {
+            const frequency = 105 + 55 * Math.exp(-time * 20);
+            phase += (Math.PI * 2 * frequency) / audioCtx.sampleRate;
+            value = Math.sin(phase) * 0.85 * Math.exp(-time * 7);
+        } else if (instrumentId === 'rimshot') {
+            value = (Math.sin(Math.PI * 2 * 610 * time) + Math.sin(Math.PI * 2 * 940 * time)) * 0.34 * Math.exp(-time * 32);
+        } else if (instrumentId === 'cowbell' || instrumentId === 'perc2' || instrumentId === 'perc5') {
+            value = (Math.sin(Math.PI * 2 * 540 * time) + Math.sin(Math.PI * 2 * 845 * time) * 0.7) * 0.48 * Math.exp(-time * 8);
+        } else if (instrumentId === 'hihatClosed' || instrumentId === 'shaker' || instrumentId === 'perc1') {
+            value = brightNoise * 0.55 * Math.exp(-time * (instrumentId === 'hihatClosed' ? 38 : 16));
+        } else if (instrumentId === 'hihatOpened' || instrumentId === 'crash' || instrumentId === 'ride' || instrumentId === 'perc3') {
+            const decay = instrumentId === 'hihatOpened' ? 8 : 2.8;
+            const metallic = Math.sin(Math.PI * 2 * 4217 * time) * Math.sin(Math.PI * 2 * 6329 * time);
+            value = (brightNoise * 0.38 + metallic * 0.17) * Math.exp(-time * decay);
+        } else if (instrumentId === 'bass1' || instrumentId === 'acid' || instrumentId === 'synth') {
+            const baseFrequency = instrumentId === 'synth' ? 110 : 55;
+            phase += (Math.PI * 2 * baseFrequency) / audioCtx.sampleRate;
+            const sine = Math.sin(phase);
+            const saw = 2 * ((phase / (Math.PI * 2)) % 1) - 1;
+            const blend = instrumentId === 'bass1' ? sine : (sine * 0.35 + saw * 0.65);
+            value = blend * 0.7 * Math.exp(-time * (instrumentId === 'synth' ? 2.6 : 3.8));
+        } else if (instrumentId === 'tamb') {
+            const metallic = Math.sin(Math.PI * 2 * 5100 * time) * Math.sin(Math.PI * 2 * 7900 * time);
+            value = (brightNoise * 0.42 + metallic * 0.2) * Math.exp(-time * 10);
+        } else {
+            const toneFrequency = 180 + (instrumentId.charCodeAt(instrumentId.length - 1) || 0) * 3;
+            value = (brightNoise * 0.38 + Math.sin(Math.PI * 2 * toneFrequency * time) * 0.4) * Math.exp(-time * 12);
+        }
+
+        channel[frame] = value;
+        peak = Math.max(peak, Math.abs(value));
+    }
+
+    if (peak > 0.92) {
+        const scale = 0.92 / peak;
+        for (let frame = 0; frame < frameCount; frame++) channel[frame] *= scale;
+    }
+
+    return audioBuffer;
+}
+
+async function fetchRemoteSample(url, retryCount = 1) {
+    let lastError;
+
+    for (let attempt = 0; attempt <= retryCount; attempt++) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+        try {
+            const response = await fetch(url, { signal: controller.signal });
+            if (!response.ok) {
+                const error = new Error(`HTTP ${response.status}`);
+                error.status = response.status;
+                throw error;
+            }
+            const contentType = response.headers.get('content-type') || '';
+            if (!contentType.startsWith('audio/') && !contentType.includes('octet-stream')) {
+                throw new Error(`Unexpected content type: ${contentType || 'unknown'}`);
+            }
+            return await audioCtx.decodeAudioData(await response.arrayBuffer());
+        } catch (error) {
+            lastError = error;
+            const shouldRetry = attempt < retryCount && (!error.status || error.status >= 500);
+            if (!shouldRetry) break;
+        } finally {
+            clearTimeout(timeoutId);
+        }
+    }
+
+    throw lastError;
+}
+
+function convertBufferToMono(audioBuffer) {
+    if (audioBuffer.numberOfChannels <= 1) return audioBuffer;
+    const monoBuffer = audioCtx.createBuffer(1, audioBuffer.length, audioBuffer.sampleRate);
+    const monoData = monoBuffer.getChannelData(0);
+
+    for (let channelIndex = 0; channelIndex < audioBuffer.numberOfChannels; channelIndex++) {
+        const source = audioBuffer.getChannelData(channelIndex);
+        for (let frame = 0; frame < audioBuffer.length; frame++) {
+            monoData[frame] += source[frame] / audioBuffer.numberOfChannels;
+        }
+    }
+
+    return monoBuffer;
+}
+
 async function loadSounds() {
     const sampleInstruments = INSTRUMENTS.filter(i => i.url);
     let loaded = 0;
+    let remoteLoaded = 0;
     const total = sampleInstruments.length;
     const progressEl = document.getElementById('loader-progress');
     const textEl = document.getElementById('loader-text');
+    const remoteLoads = new Map();
 
-    for (const inst of sampleInstruments) {
+    if (!REMOTE_SAMPLE_LIBRARY_ENABLED) {
+        sampleInstruments.forEach(inst => {
+            buffers[inst.id] = createProceduralSample(inst.id);
+            sampleSources[inst.id] = 'procedural';
+        });
+        if (progressEl) progressEl.style.width = '100%';
+        if (textEl) textEl.textContent = `Audio ready — ${total} built-in instruments loaded`;
+        console.warn('Remote SampleSwap loading is disabled because the supplied paths are not browser-loadable. Using built-in Web Audio instruments.');
+        return;
+    }
+
+    await Promise.all(sampleInstruments.map(async inst => {
         try {
             textEl.textContent = `Loading ${inst.label}...`;
-            const response = await fetch(inst.url);
-            const arrayBuffer = await response.arrayBuffer();
-            let audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
 
-            // Convert to mono if needed
-            if (inst.mono && audioBuffer.numberOfChannels > 1) {
-                const len = audioBuffer.length;
-                const sr = audioBuffer.sampleRate;
-                const nc = audioBuffer.numberOfChannels;
-                const monoBuffer = audioCtx.createBuffer(1, len, sr);
-                const monoData = monoBuffer.getChannelData(0);
-                for (let s = 0; s < len; s++) {
-                    let sum = 0;
-                    for (let c = 0; c < nc; c++) sum += audioBuffer.getChannelData(c)[s];
-                    monoData[s] = sum / nc;
-                }
-                audioBuffer = monoBuffer;
-            }
-            buffers[inst.id] = audioBuffer;
+            if (!remoteLoads.has(inst.url)) remoteLoads.set(inst.url, fetchRemoteSample(inst.url));
+            const decoded = await remoteLoads.get(inst.url);
+            buffers[inst.id] = inst.mono ? convertBufferToMono(decoded) : decoded;
+            sampleSources[inst.id] = 'remote';
+            remoteLoaded++;
         } catch (err) {
-            console.warn(`Failed to load ${inst.label}: ${err.message}`);
+            buffers[inst.id] = createProceduralSample(inst.id);
+            sampleSources[inst.id] = 'procedural';
+            console.warn(`SampleSwap ${inst.label} unavailable (${err.message}); using the built-in Web Audio fallback.`);
         }
         loaded++;
         if (progressEl) progressEl.style.width = `${(loaded / total) * 100}%`;
+    }));
+
+    if (textEl) {
+        const fallbackCount = total - remoteLoaded;
+        textEl.textContent = fallbackCount > 0
+            ? `Audio ready — ${fallbackCount} built-in fallback${fallbackCount === 1 ? '' : 's'} active`
+            : `Audio ready — ${remoteLoaded} samples loaded`;
     }
 }
 
@@ -301,7 +463,7 @@ function scheduler() {
 function advanceStep() {
     const secondsPerBeat = 60.0 / tempo;
     nextNoteTime += 0.25 * secondsPerBeat;
-    currentStep = (currentStep + 1) % 32;
+    currentStep = (currentStep + 1) % SEQUENCE_LENGTH;
 }
 
 function scheduleNote(step, time) {
@@ -344,6 +506,10 @@ function scheduleNote(step, time) {
 async function startPlaying() {
     if (isPlaying) return;
     if (audioCtx.state === 'suspended') await audioCtx.resume();
+    if (typeof Tone !== 'undefined' && typeof Tone.start === 'function') {
+        try { await Tone.start(); } catch (error) { console.warn('Tone.js could not start:', error); }
+    }
+    initToneJS();
     isPlaying = true;
     currentStep = 0;
     previousStep = -1;
@@ -461,7 +627,7 @@ function generatePads() {
     const config = INSTRUMENT_MAP[currentInstrument];
     const isPitched = !!config.pitched;
 
-    for (let i = 0; i < 32; i++) {
+    for (let i = 0; i < SEQUENCE_LENGTH; i++) {
         const pad = document.createElement('div');
         pad.classList.add('pad');
         pad.dataset.step = i + 1;
@@ -586,6 +752,431 @@ function generateRandomSequence(instrumentId) {
     if (currentInstrument === instrumentId) generatePads();
 }
 
+// ============= AI PATTERN GENERATION =============
+const AI_DRUM_IDS = [
+    'kick', 'snare', 'hihatClosed', 'hihatOpened', 'clap',
+    'tom', 'perc1', 'perc2', 'perc3', 'crash', 'ride'
+];
+const SERVER_PATTERN_IDS = [
+    'kick', 'snare', 'hihatClosed', 'hihatOpened', 'clap',
+    'tom', 'perc1', 'perc2', 'perc3'
+];
+const SUPPORTED_AI_GENRES = new Set(['techno', 'house', 'trance', 'dnb']);
+
+function clampEnergy(value) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? Math.min(1, Math.max(0, parsed)) : 0.7;
+}
+
+function createBooleanDrumPattern(steps = SEQUENCE_LENGTH) {
+    const safeSteps = Math.max(1, Math.min(SEQUENCE_LENGTH, Math.trunc(Number(steps)) || SEQUENCE_LENGTH));
+    return Object.fromEntries(AI_DRUM_IDS.map(id => [id, Array(safeSteps).fill(false)]));
+}
+
+function addPatternHit(pattern, instrumentId, step) {
+    if (pattern[instrumentId] && Number.isInteger(step) && step >= 0 && step < pattern[instrumentId].length) {
+        pattern[instrumentId][step] = true;
+    }
+}
+
+function addPatternHits(pattern, instrumentId, steps) {
+    steps.forEach(step => addPatternHit(pattern, instrumentId, step));
+}
+
+function addEvery(pattern, instrumentId, start, interval) {
+    for (let step = start; step < pattern[instrumentId].length; step += interval) {
+        addPatternHit(pattern, instrumentId, step);
+    }
+}
+
+// Deterministic offline fallback. Each energy tier adds hits without removing the groove.
+function generateRuleBasedPattern(genre = 'techno', steps = SEQUENCE_LENGTH, energy = 0.7) {
+    const selectedGenre = SUPPORTED_AI_GENRES.has(genre) ? genre : 'techno';
+    const selectedEnergy = clampEnergy(energy);
+    const pattern = createBooleanDrumPattern(steps);
+
+    for (let bar = 0; bar < pattern.kick.length; bar += 16) {
+        const at = offset => bar + offset;
+
+        if (selectedGenre === 'dnb') {
+            addPatternHits(pattern, 'kick', [at(0), at(6), at(10)]);
+            addPatternHits(pattern, 'snare', [at(4), at(12)]);
+            if (selectedEnergy >= 0.25) addEvery(pattern, 'hihatClosed', at(0), 2);
+            if (selectedEnergy >= 0.5) addPatternHits(pattern, 'kick', [at(15)]);
+            if (selectedEnergy >= 0.65) addPatternHits(pattern, 'perc1', [at(3), at(11)]);
+            if (selectedEnergy >= 0.8) addPatternHits(pattern, 'hihatOpened', [at(7), at(15)]);
+            if (selectedEnergy >= 0.9) addPatternHits(pattern, 'tom', [at(13), at(14), at(15)]);
+            continue;
+        }
+
+        addPatternHits(pattern, 'kick', [at(0), at(4), at(8), at(12)]);
+
+        if (selectedGenre === 'house') {
+            addPatternHits(pattern, 'snare', [at(4), at(12)]);
+            addPatternHits(pattern, 'clap', [at(4), at(12)]);
+            addPatternHits(pattern, 'hihatClosed', [at(2), at(6), at(10), at(14)]);
+            if (selectedEnergy >= 0.45) addEvery(pattern, 'hihatClosed', at(0), 2);
+            if (selectedEnergy >= 0.65) addPatternHits(pattern, 'hihatOpened', [at(6), at(14)]);
+            if (selectedEnergy >= 0.8) addPatternHits(pattern, 'perc1', [at(3), at(11)]);
+            if (selectedEnergy >= 0.95) addPatternHits(pattern, 'perc2', [at(7), at(15)]);
+        } else if (selectedGenre === 'trance') {
+            addPatternHits(pattern, 'snare', [at(4), at(12)]);
+            if (selectedEnergy >= 0.2) addPatternHits(pattern, 'hihatClosed', [at(2), at(6), at(10), at(14)]);
+            if (selectedEnergy >= 0.45) addEvery(pattern, 'hihatClosed', at(1), 2);
+            if (selectedEnergy >= 0.65) addPatternHits(pattern, 'clap', [at(4), at(12)]);
+            if (selectedEnergy >= 0.75) addPatternHits(pattern, 'hihatOpened', [at(6), at(14)]);
+            if (selectedEnergy >= 0.9) addPatternHits(pattern, 'perc3', [at(3), at(7), at(11), at(15)]);
+        } else {
+            addPatternHits(pattern, 'snare', [at(4), at(12)]);
+            if (selectedEnergy >= 0.2) addPatternHits(pattern, 'hihatClosed', [at(2), at(6), at(10), at(14)]);
+            if (selectedEnergy >= 0.45) addEvery(pattern, 'hihatClosed', at(1), 2);
+            if (selectedEnergy >= 0.6) addPatternHits(pattern, 'clap', [at(4), at(12)]);
+            if (selectedEnergy >= 0.7) addPatternHits(pattern, 'hihatOpened', [at(6), at(14)]);
+            if (selectedEnergy >= 0.85) addPatternHits(pattern, 'perc1', [at(3), at(11)]);
+            if (selectedEnergy >= 0.95) addPatternHits(pattern, 'tom', [at(13), at(14), at(15)]);
+        }
+    }
+
+    return pattern;
+}
+
+function applyBooleanPattern(pattern) {
+    let hitCount = 0;
+
+    AI_DRUM_IDS.forEach(instrumentId => {
+        if (!Array.isArray(pattern?.[instrumentId]) || !sequences[instrumentId]) return;
+
+        sequences[instrumentId] = sequences[instrumentId].map((step, index) => {
+            const active = pattern[instrumentId][index] === true;
+            if (active) hitCount++;
+            return { ...step, active };
+        });
+    });
+
+    generatePads();
+    return hitCount;
+}
+
+function generateBassSequence(genre, energy) {
+    const selectedGenre = SUPPORTED_AI_GENRES.has(genre) ? genre : 'techno';
+    const selectedEnergy = clampEnergy(energy);
+    const scale = selectedGenre === 'dnb' ? 'phrygian' : 'minor';
+    const scalePitches = getScalePitches(scale);
+    const patterns = {
+        techno: [[0, 0], [6, 3], [8, 0], [14, 5]],
+        house: [[0, 0], [3, 2], [6, 4], [8, 0], [11, 2], [14, 5]],
+        trance: [[0, 0], [2, 4], [4, 5], [6, 4], [8, 0], [10, 4], [12, 5], [14, 6]],
+        dnb: [[0, 0], [5, 3], [7, 0], [10, 5], [13, 1]]
+    };
+    const base = patterns[selectedGenre];
+    const allowedHits = selectedEnergy < 0.35
+        ? base.filter((_, index) => index % 2 === 0)
+        : selectedEnergy < 0.75
+            ? base
+            : [...base, [15, 2]];
+    const byStep = new Map();
+
+    for (let bar = 0; bar < SEQUENCE_LENGTH; bar += 16) {
+        allowedHits.forEach(([offset, pitchIndex]) => {
+            const step = bar + offset;
+            if (step < SEQUENCE_LENGTH) byStep.set(step, scalePitches[pitchIndex % scalePitches.length]);
+        });
+    }
+
+    return Array.from({ length: SEQUENCE_LENGTH }, (_, step) => ({
+        active: byStep.has(step),
+        pitch: byStep.get(step) || 0,
+        scale
+    }));
+}
+
+function setAiStatus(message, state = '') {
+    const status = document.getElementById('ai-status');
+    if (!status) return;
+    status.textContent = message;
+    if (state) status.dataset.state = state;
+    else delete status.dataset.state;
+}
+
+function setAiControlsBusy(isBusy) {
+    ['ai-generate-drums', 'ai-generate-bass', 'ai-clear'].forEach(id => {
+        const button = document.getElementById(id);
+        if (button) button.disabled = isBusy;
+    });
+}
+
+async function requestServerPattern({ genre, bpm, energy }) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+    try {
+        const response = await fetch('/api/generate-pattern', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ genre, bpm, energy, length: SEQUENCE_LENGTH }),
+            signal: controller.signal
+        });
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok || data?.success !== true || !data.pattern) {
+            throw new Error(data?.error || `Pattern service returned ${response.status}`);
+        }
+
+        const isValidPattern = SERVER_PATTERN_IDS.every(instrumentId => (
+            Array.isArray(data.pattern[instrumentId])
+            && data.pattern[instrumentId].length === SEQUENCE_LENGTH
+            && data.pattern[instrumentId].every(step => typeof step === 'boolean')
+        ));
+        if (!isValidPattern) throw new Error('Pattern service returned an invalid sequence');
+
+        return data.pattern;
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
+
+const MAGENTA_CHECKPOINT = 'https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/drum_kit_rnn';
+const MAGENTA_PITCH_TO_INSTRUMENT = new Map([
+    [35, 'kick'], [36, 'kick'],
+    [38, 'snare'], [40, 'snare'],
+    [39, 'clap'],
+    [42, 'hihatClosed'], [44, 'hihatClosed'],
+    [46, 'hihatOpened'],
+    [41, 'tom'], [43, 'tom'], [45, 'tom'], [47, 'tom'], [48, 'tom'], [50, 'tom'],
+    [49, 'crash'], [55, 'crash'], [57, 'crash'], [58, 'crash'],
+    [51, 'ride'], [52, 'ride'], [53, 'ride'], [59, 'ride'], [82, 'ride']
+]);
+const MAGENTA_INSTRUMENT_TO_PITCH = Object.freeze({
+    kick: 36,
+    snare: 38,
+    hihatClosed: 42,
+    hihatOpened: 46,
+    tom: 45,
+    crash: 49,
+    ride: 51
+});
+
+let drumsRNN = null;
+let magentaInitialization = null;
+let magentaLibraryLoading = null;
+
+async function loadMagentaLibrary() {
+    if (window.mm?.MusicRNN) return window.mm;
+    if (magentaLibraryLoading) return magentaLibraryLoading;
+
+    magentaLibraryLoading = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        const timeoutId = setTimeout(() => {
+            script.remove();
+            reject(new Error('Magenta.js download timed out'));
+        }, 12000);
+
+        script.id = 'magenta-script';
+        script.src = 'https://cdn.jsdelivr.net/npm/@magenta/music@1.23.1/dist/magentamusic.min.js';
+        script.async = true;
+        script.crossOrigin = 'anonymous';
+        script.addEventListener('load', () => {
+            clearTimeout(timeoutId);
+            if (window.mm?.MusicRNN) resolve(window.mm);
+            else reject(new Error('Magenta.js loaded without MusicRNN'));
+        }, { once: true });
+        script.addEventListener('error', () => {
+            clearTimeout(timeoutId);
+            reject(new Error('Magenta.js failed to download'));
+        }, { once: true });
+        document.head.appendChild(script);
+    });
+
+    try {
+        return await magentaLibraryLoading;
+    } catch (error) {
+        magentaLibraryLoading = null;
+        document.getElementById('magenta-script')?.remove();
+        throw error;
+    }
+}
+
+async function initializeMagenta() {
+    if (drumsRNN) return drumsRNN;
+    if (magentaInitialization) return magentaInitialization;
+
+    magentaInitialization = (async () => {
+        const magenta = await loadMagentaLibrary();
+        const model = new magenta.MusicRNN(MAGENTA_CHECKPOINT);
+        try {
+            await model.initialize();
+            drumsRNN = model;
+            console.info('Magenta.js drum model initialized');
+            return model;
+        } catch (error) {
+            try { model.dispose(); } catch (_) {}
+            throw error;
+        }
+    })();
+
+    try {
+        return await magentaInitialization;
+    } catch (error) {
+        drumsRNN = null;
+        magentaInitialization = null;
+        console.warn('Magenta.js initialization failed:', error);
+        throw error;
+    }
+}
+
+function createMagentaSeed(genre, bpm, energy) {
+    const seedPattern = generateRuleBasedPattern(genre, 16, Math.min(0.5, clampEnergy(energy)));
+    const notes = [];
+
+    Object.entries(MAGENTA_INSTRUMENT_TO_PITCH).forEach(([instrumentId, pitch]) => {
+        seedPattern[instrumentId].forEach((active, step) => {
+            if (!active) return;
+            notes.push({
+                pitch,
+                quantizedStartStep: step,
+                quantizedEndStep: step + 1,
+                isDrum: true
+            });
+        });
+    });
+
+    return {
+        notes,
+        quantizationInfo: { stepsPerQuarter: 4 },
+        totalQuantizedSteps: 16,
+        tempos: [{ qpm: bpm }]
+    };
+}
+
+function convertMagentaToPattern(noteSequence, steps = SEQUENCE_LENGTH) {
+    const pattern = createBooleanDrumPattern(steps);
+
+    for (const note of noteSequence?.notes || []) {
+        const instrumentId = MAGENTA_PITCH_TO_INSTRUMENT.get(Number(note.pitch));
+        const step = Number(note.quantizedStartStep);
+        if (!instrumentId || !Number.isInteger(step) || step < 0 || step >= steps) continue;
+        pattern[instrumentId][step] = true;
+    }
+
+    return pattern;
+}
+
+function mergePatterns(basePattern, generatedPattern) {
+    const merged = createBooleanDrumPattern(basePattern.kick.length);
+
+    AI_DRUM_IDS.forEach(instrumentId => {
+        merged[instrumentId] = merged[instrumentId].map((_, step) => (
+            basePattern[instrumentId]?.[step] === true || generatedPattern[instrumentId]?.[step] === true
+        ));
+    });
+
+    return merged;
+}
+
+async function generateMagentaDrums({ genre, bpm, energy, steps = SEQUENCE_LENGTH }) {
+    const model = await initializeMagenta();
+    const temperature = 0.8 + (clampEnergy(energy) * 0.7);
+    const seed = createMagentaSeed(genre, bpm, energy);
+    const noteSequence = await model.continueSequence(seed, steps, temperature);
+    const magentaPattern = convertMagentaToPattern(noteSequence, steps);
+    const generatedHits = Object.values(magentaPattern).reduce(
+        (total, track) => total + track.filter(Boolean).length,
+        0
+    );
+
+    if (generatedHits === 0) throw new Error('Magenta returned an empty sequence');
+
+    // Preserve each genre's core groove while using Magenta for variation.
+    const foundation = generateRuleBasedPattern(genre, steps, Math.min(0.3, clampEnergy(energy)));
+    return mergePatterns(foundation, magentaPattern);
+}
+
+async function generateDrumPatternWithFallback({ genre, bpm, energy }) {
+    try {
+        return {
+            pattern: await requestServerPattern({ genre, bpm, energy }),
+            source: 'server'
+        };
+    } catch (serverError) {
+        console.warn('Pattern API unavailable; trying Magenta.js:', serverError);
+        setAiStatus('Pattern service unavailable. Trying browser AI…', 'warning');
+    }
+
+    try {
+        return {
+            pattern: await generateMagentaDrums({ genre, bpm, energy }),
+            source: 'magenta'
+        };
+    } catch (magentaError) {
+        console.warn('Magenta.js unavailable; using local pattern engine:', magentaError);
+        return {
+            pattern: generateRuleBasedPattern(genre, SEQUENCE_LENGTH, energy),
+            source: 'local'
+        };
+    }
+}
+
+function setupAiControls() {
+    const energySlider = document.getElementById('energy-slider');
+    const energyDisplay = document.getElementById('energy-display');
+    const genreSelect = document.getElementById('genre-select');
+    const generateDrumsButton = document.getElementById('ai-generate-drums');
+    const generateBassButton = document.getElementById('ai-generate-bass');
+    const clearButton = document.getElementById('ai-clear');
+
+    energySlider.addEventListener('input', () => {
+        energyDisplay.value = energySlider.value;
+        energyDisplay.textContent = energySlider.value;
+    });
+
+    generateDrumsButton.addEventListener('click', async () => {
+        const genre = genreSelect.value;
+        const energy = clampEnergy(energySlider.value);
+        setAiControlsBusy(true);
+        setAiStatus('Generating a 32-step drum pattern…');
+
+        try {
+            const result = await generateDrumPatternWithFallback({ genre, bpm: tempo, energy });
+            const hitCount = applyBooleanPattern(result.pattern);
+            const sourceLabels = {
+                server: 'server generator',
+                magenta: 'browser AI',
+                local: 'offline generator'
+            };
+            setAiStatus(`Pattern ready with ${hitCount} hits via ${sourceLabels[result.source]}. Press Play to hear it.`, 'success');
+        } catch (error) {
+            console.error('Drum generation failed:', error);
+            setAiStatus('Could not generate a pattern. Your current sequence was kept.', 'error');
+        } finally {
+            setAiControlsBusy(false);
+        }
+    });
+
+    generateBassButton.addEventListener('click', () => {
+        const genre = genreSelect.value;
+        const energy = clampEnergy(energySlider.value);
+        sequences.bass1 = generateBassSequence(genre, energy);
+        currentInstrument = 'bass1';
+        document.querySelectorAll('.instrument-button').forEach(button => {
+            button.classList.toggle('active', button.dataset.instrument === currentInstrument);
+        });
+        generatePads();
+        const hitCount = sequences.bass1.filter(step => step.active).length;
+        setAiStatus(`Bass pattern ready with ${hitCount} notes. Press Play to hear it.`, 'success');
+    });
+
+    clearButton.addEventListener('click', () => {
+        Object.values(sequences).forEach(sequence => {
+            sequence.forEach(step => {
+                step.active = false;
+                step.pitch = 0;
+            });
+        });
+        generatePads();
+        setAiStatus('All instrument patterns cleared.');
+    });
+}
+
 // ============= SAVE / LOAD =============
 function savePattern() {
     const data = {
@@ -651,57 +1242,6 @@ function showToast(msg) {
     toastTimeout = setTimeout(() => el.classList.remove('visible'), 2000);
 }
 
-// ============= FREESOUND API =============
-const SEARCH_TERMS = {
-    kick: 'kick drum one shot', snare: 'snare drum one shot',
-    clap: 'clap percussion one shot', tom: 'tom drum one shot',
-    rimshot: 'rimshot percussion', cowbell: 'cowbell one shot',
-    hihatClosed: 'closed hi-hat one shot', hihatOpened: 'open hi-hat one shot',
-    crash: 'crash cymbal one shot', ride: 'ride cymbal one shot',
-    perc1: 'percussion hit', perc2: 'wood block percussion',
-    perc3: 'bongo drum one shot', perc4: 'conga drum one shot',
-    perc5: 'guiro percussion', perc6: 'agogo bell',
-    shaker: 'shaker percussion one shot', tamb: 'tambourine one shot',
-    bass1: 'bass synth one shot', acid: 'acid 303 one shot',
-    synth: 'synth stab one shot'
-};
-
-async function searchFreesound(query, apiKey) {
-    const url = `https://freesound.org/apiv2/search/text/?query=${encodeURIComponent(query)}&token=${apiKey}&fields=id,name,previews&page_size=1&filter=duration:[0 TO 3]`;
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error(`Freesound API ${resp.status}`);
-    const data = await resp.json();
-    if (data.results && data.results.length > 0) {
-        return data.results[0].previews['preview-hq-mp3'];
-    }
-    return null;
-}
-
-async function fixMissingSamples() {
-    const apiKey = localStorage.getItem('dm99-freesound-key');
-    if (!apiKey) { showToast('Set your Freesound API key in ⚙️ Settings first'); return; }
-
-    const missing = INSTRUMENTS.filter(i => i.url && !buffers[i.id]);
-    if (missing.length === 0) { showToast('All samples loaded ✓'); return; }
-
-    showToast(`Searching Freesound for ${missing.length} missing samples...`);
-    let found = 0;
-
-    for (const inst of missing) {
-        const term = SEARCH_TERMS[inst.id] || inst.label;
-        try {
-            const previewUrl = await searchFreesound(term, apiKey);
-            if (previewUrl) {
-                const resp = await fetch(previewUrl);
-                const ab = await resp.arrayBuffer();
-                buffers[inst.id] = await audioCtx.decodeAudioData(ab);
-                found++;
-            }
-        } catch(e) { console.warn(`Freesound: ${inst.label} failed`, e); }
-    }
-    showToast(found > 0 ? `Found ${found}/${missing.length} samples via Freesound ✓` : 'No samples found — try different search terms');
-}
-
 // ============= KEYBOARD SHORTCUTS =============
 function setupKeyboard() {
     document.addEventListener('keydown', (e) => {
@@ -738,20 +1278,11 @@ async function init() {
     setTimeout(() => { loadingScreen.style.display = 'none'; }, 500);
     document.getElementById('app').classList.remove('hidden');
 
-    // Initialize Tone.js synth engine
-    initToneJS();
-
     // Generate dynamic UI
     generateInstrumentPanel();
     generatePads();
     generateADSR();
-
-    // Auto-fix missing samples if API key exists
-    const savedKey = localStorage.getItem('dm99-freesound-key');
-    if (savedKey) {
-        const missing = INSTRUMENTS.filter(i => i.url && !buffers[i.id]);
-        if (missing.length > 0) fixMissingSamples();
-    }
+    setupAiControls();
 
     // Footer year
     document.getElementById('current-year').textContent = new Date().getFullYear();
@@ -854,31 +1385,6 @@ async function init() {
     // Keyboard shortcuts
     setupKeyboard();
 
-    // Settings modal
-    const settingsModal = document.getElementById('settings-modal');
-    const apiKeyInput = document.getElementById('freesound-api-key');
-    if (savedKey) apiKeyInput.value = savedKey;
-
-    document.getElementById('settings-btn').addEventListener('click', () => {
-        settingsModal.style.display = 'flex';
-    });
-    document.getElementById('close-settings').addEventListener('click', () => {
-        settingsModal.style.display = 'none';
-    });
-    window.addEventListener('click', (e) => {
-        if (e.target === settingsModal) settingsModal.style.display = 'none';
-    });
-    document.getElementById('save-settings').addEventListener('click', () => {
-        const key = apiKeyInput.value.trim();
-        if (key) {
-            localStorage.setItem('dm99-freesound-key', key);
-            showToast('API key saved ✓');
-        } else {
-            localStorage.removeItem('dm99-freesound-key');
-            showToast('API key removed');
-        }
-    });
-    document.getElementById('fetch-sounds-btn').addEventListener('click', fixMissingSamples);
 }
 
 document.addEventListener('DOMContentLoaded', init);

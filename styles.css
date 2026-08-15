@@ -77,6 +77,7 @@ body {
     font-family: var(--font-display); font-size: 2.8em; color: var(--red);
     text-shadow: 0 0 20px rgba(255,23,68,0.4);
 }
+#title span { color: var(--accent); font-size: 0.55em; vertical-align: super; }
 #master-volume-container {
     display: flex; align-items: center; gap: 10px; font-size: 0.85em;
 }
@@ -87,6 +88,66 @@ body {
     background: var(--bg-surface); border: 1px solid var(--border);
     border-radius: var(--radius); margin: 10px 20px; padding: 14px 18px;
     backdrop-filter: blur(8px);
+}
+
+/* ============= AI PATTERN GENERATOR ============= */
+.ai-controls {
+    max-width: 1460px; margin: 14px auto; padding: 20px;
+    background:
+        radial-gradient(circle at 92% 0%, rgba(0,230,118,0.12), transparent 34%),
+        linear-gradient(135deg, rgba(22,33,62,0.96), rgba(15,18,35,0.96));
+    border-color: rgba(0,230,118,0.28);
+}
+.ai-controls-heading {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 16px; margin-bottom: 16px;
+}
+.ai-controls .eyebrow {
+    color: var(--accent); font-size: 0.68em; font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 3px;
+}
+.ai-controls h2 {
+    color: var(--text); font-family: var(--font-display); font-size: 1.15em;
+    font-weight: 400; letter-spacing: 0.04em;
+}
+.ai-mode-badge {
+    border: 1px solid rgba(0,230,118,0.3); border-radius: 999px;
+    color: var(--accent); font-size: 0.7em; padding: 5px 9px; white-space: nowrap;
+}
+.ai-controls-grid {
+    display: grid; grid-template-columns: minmax(150px, 0.65fr) minmax(210px, 1fr) auto;
+    align-items: end; gap: 14px;
+}
+.ai-field { display: grid; gap: 7px; min-width: 0; }
+.ai-field > span { color: #a9afbd; font-size: 0.75em; font-weight: 600; }
+.ai-field output { color: var(--accent); margin-left: 5px; font-variant-numeric: tabular-nums; }
+.ai-field select {
+    width: 100%; min-height: 40px; padding: 8px 34px 8px 11px;
+    background: #101a31; border: 1px solid rgba(0,230,118,0.32);
+    border-radius: 6px; color: var(--text); cursor: pointer; font: inherit;
+}
+.ai-energy input { width: 100%; min-height: 40px; }
+.ai-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.ai-button {
+    min-height: 40px; padding: 9px 15px; border-radius: 6px;
+    font-family: var(--font-body); font-size: 0.8em; font-weight: 600;
+    cursor: pointer; transition: transform 0.15s, background 0.2s, border-color 0.2s, opacity 0.2s;
+}
+.ai-button:hover:not(:disabled) { transform: translateY(-1px); }
+.ai-button:active:not(:disabled) { transform: translateY(0); }
+.ai-button:disabled { cursor: wait; opacity: 0.58; }
+.ai-button-primary { background: var(--accent); border: 1px solid var(--accent); color: #04130b; }
+.ai-button-primary:hover:not(:disabled) { background: #43ee94; }
+.ai-button-secondary { background: rgba(0,230,118,0.08); border: 1px solid var(--accent); color: var(--accent); }
+.ai-button-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.24); color: #a9afbd; }
+.ai-status {
+    min-height: 1.4em; margin-top: 12px; color: #a9afbd; font-size: 0.75em; line-height: 1.4;
+}
+.ai-status[data-state="success"] { color: var(--accent); }
+.ai-status[data-state="warning"] { color: var(--yellow); }
+.ai-status[data-state="error"] { color: var(--red); }
+.ai-button:focus-visible, .ai-field select:focus-visible, .ai-field input:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 3px;
 }
 
 /* ============= INSTRUMENT PANEL ============= */
@@ -313,13 +374,26 @@ input[type="range"]::-moz-range-thumb {
     #header { flex-direction: column; gap: 8px; text-align: center; }
     #title { font-size: 2em; }
     .control-group input[type="range"] { width: 90px; }
+    .ai-controls { margin-inline: 12px; }
+    .ai-controls-grid { grid-template-columns: 1fr 1.3fr; }
+    .ai-actions { grid-column: 1 / -1; justify-content: flex-start; }
 }
 @media (max-width: 500px) {
-    #drum-machine { grid-template-columns: repeat(4, 1fr); padding-bottom: 100px; }
+    #drum-machine { grid-template-columns: repeat(4, 1fr); padding-bottom: 24px; }
     .instrument-button { font-size: 0.7em; padding: 5px 8px; }
     .solo-button, .mute-button { width: 24px; height: 24px; font-size: 0.65em; }
     .volume-slider { width: 40px; }
     .control-button { padding: 8px 12px; font-size: 0.75em; }
     #slider-controls { flex-direction: column; align-items: center; }
     #eq-panel { flex-direction: column; }
+    .ai-controls { margin-inline: 8px; padding: 16px 14px; }
+    .ai-controls-heading { display: block; }
+    .ai-mode-badge { display: inline-block; margin-top: 8px; }
+    .ai-controls-grid { grid-template-columns: 1fr; }
+    .ai-actions { grid-column: auto; display: grid; grid-template-columns: 1fr; }
+    .ai-button { width: 100%; }
+    .buy-me-coffee {
+        position: static; display: block; width: max-content; margin: 18px auto 10px;
+    }
+    footer { position: static; padding: 10px 12px 14px; }
 }
